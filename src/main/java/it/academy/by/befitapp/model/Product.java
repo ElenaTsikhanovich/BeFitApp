@@ -2,6 +2,8 @@ package it.academy.by.befitapp.model;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "products")
 public class Product implements Serializable {
@@ -28,8 +30,17 @@ public class Product implements Serializable {
     @Column(name = "carbohydrates")
     private Double carbohydrates;
 
-    @Column(name = "grams")
-    private Integer grams;
+    @Column(name = "weight")
+    private Double weight;
+
+    @Column(name = "createTime")
+    private LocalDateTime createTime;
+
+    @Column(name = "updateTime")
+    private LocalDateTime updateTime;
+
+    @OneToOne
+    private User userWhoUpdate;
 
     public Product(){
 
@@ -91,25 +102,36 @@ public class Product implements Serializable {
         this.carbohydrates = carbohydrates;
     }
 
-    public Integer getGrams() {
-        return grams;
+    public Double getWeight() {
+        return weight;
     }
 
-    public void setGrams(Integer grams) {
-        this.grams = grams;
+    public void setWeight(Double weight) {
+        this.weight = weight;
     }
 
-    @Override
-    public String toString() {
-        return "Product{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", brand='" + brand + '\'' +
-                ", calories=" + calories +
-                ", protein=" + protein +
-                ", fat=" + fat +
-                ", carbohydrates=" + carbohydrates +
-                ", grams=" + grams +
-                '}';
+    public LocalDateTime getCreateTime() {
+        return createTime;
     }
+
+    public void setCreateTime(LocalDateTime createTime) {
+        this.createTime = createTime;
+    }
+
+    public LocalDateTime getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(LocalDateTime updateTime) {
+        this.updateTime = updateTime;
+    }
+
+    public User getUserWhoUpdate() {
+        return userWhoUpdate;
+    }
+
+    public void setUserWhoUpdate(User user) {
+        this.userWhoUpdate = user;
+    }
+
 }

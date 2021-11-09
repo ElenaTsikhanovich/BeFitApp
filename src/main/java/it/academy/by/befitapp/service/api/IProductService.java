@@ -1,16 +1,13 @@
 package it.academy.by.befitapp.service.api;
 
+import it.academy.by.befitapp.dto.ProductSearchDto;
 import it.academy.by.befitapp.model.Product;
-import java.util.List;
+import org.springframework.data.domain.Page;
 
 public interface IProductService {
     Product get(Long id);
-    List<Product> getAll();
+    Page<Product> getAll(ProductSearchDto productSearchDto);
     Long save(Product product);
-    boolean update(Product product, Long id);
-    boolean delete(Long id);
-
-
-
+    void update(Product product, Long id);
+    void delete(Long id);
 }
-

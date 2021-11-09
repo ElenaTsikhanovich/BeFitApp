@@ -1,14 +1,17 @@
 package it.academy.by.befitapp.dao.api;
 
 import it.academy.by.befitapp.model.Product;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface IProductDao {
-    Product get(Long id);
-    List<Product> getAll();
-    Long save(Product product);
-    boolean update(Product product,Long id);
-    boolean delete(Long id);
-
+public interface IProductDao extends JpaRepository<Product, Long> {
+    Page<Product> findProductByName(String name, Pageable pageable);
+    Page<Product> findProductByBrand(String brand, Pageable pageable);
+    Page<Product> findProductByNameAndBrand(String name, String brand,Pageable pageable);
+    Page<Product> findProductByCaloriesBetween(Double caloriesAfter, Double caloriesBefore,Pageable pageable);
+    Page<Product> findProductByCaloriesAfter(Double caloriesAfter,Pageable pageable);
+    Page<Product> findProductByCaloriesBefore(Double caloriesBefore,Pageable pageable);
 }
