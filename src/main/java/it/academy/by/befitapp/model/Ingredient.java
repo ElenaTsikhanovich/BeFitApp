@@ -24,9 +24,6 @@ public class Ingredient implements Serializable {
     @Column(name = "updateTime")
     private LocalDateTime updateTime;
 
-    @OneToOne
-    private User user;
-
     public Ingredient(){
 
     }
@@ -71,11 +68,4 @@ public class Ingredient implements Serializable {
         this.updateTime = updateTime;
     }
 
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
 }

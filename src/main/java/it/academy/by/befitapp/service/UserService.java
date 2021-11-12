@@ -2,10 +2,11 @@ package it.academy.by.befitapp.service;
 
 import it.academy.by.befitapp.dao.api.IUserDao;
 import it.academy.by.befitapp.dto.ListDto;
+import it.academy.by.befitapp.dto.LoginDto;
 import it.academy.by.befitapp.model.User;
 import it.academy.by.befitapp.model.api.EAuditAction;
 import it.academy.by.befitapp.model.api.EntityType;
-import it.academy.by.befitapp.model.api.UserRole;
+import it.academy.by.befitapp.model.api.Role;
 import it.academy.by.befitapp.model.api.UserStatus;
 import it.academy.by.befitapp.service.api.IAuditService;
 import it.academy.by.befitapp.service.api.IUserService;
@@ -15,15 +16,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
+
 @Service
 public class UserService implements IUserService {
     private final IUserDao iUserDao;
-    private final IAuditService iAuditService;
 
-    public UserService(IUserDao iUserDao, IAuditService iAuditService) {
+    public UserService(IUserDao iUserDao) {
         this.iUserDao = iUserDao;
-        this.iAuditService = iAuditService;
     }
 
     @Override
@@ -35,7 +34,7 @@ public class UserService implements IUserService {
 
     @Override
     public Page<User> getAll(ListDto listDto) { //только администратор может всех смотреть
-        Pageable pageable= PageRequest.of(listDto.getPage(), listDto.getSize());
+        Pageable pageable = PageRequest.of(listDto.getPage(), listDto.getSize());
         return this.iUserDao.findAll(pageable);
     }
 
@@ -44,11 +43,10 @@ public class UserService implements IUserService {
         LocalDateTime createTime = LocalDateTime.now();
         user.setCreateTime(createTime);
         user.setUpdateTime(createTime);
-        user.setRole(UserRole.USER);
+        user.setRole(Role.ROLE_USER);
         user.setUserStatus(UserStatus.NO_ACTIVE);
         User saveUser = this.iUserDao.save(user); // при регистрации отправляется письмо на почту
         Long id = saveUser.getId();
-        this.iAuditService.save(EAuditAction.SAVE, EntityType.USER, id);
         return id;
     }
 
@@ -63,12 +61,22 @@ public class UserService implements IUserService {
         LocalDateTime updateTime = LocalDateTime.now();
         userForUpdate.setUpdateTime(updateTime);
         this.iUserDao.save(userForUpdate);
-        this.iAuditService.save(EAuditAction.UPDATE, EntityType.USER, id);
     }
 
     @Override
     public void delete(Long id) {
         this.iUserDao.deleteById(id);
-        this.iAuditService.save(EAuditAction.DELETE, EntityType.USER, id);
+    }
+
+    @Override
+    public User getByLoginAndPassword(LoginDto loginDto) {
+            User byLoginAndPassword = this.iUserDao.findByLoginAndPassword(loginDto.getLogin(), loginDto.getPassword());
+            return byLoginAndPassword;
+    }
+
+    @Override
+    public User getByLogin(String login) {
+        User byLogin = this.iUserDao.findByLogin(login);
+        return byLogin;
     }
 }

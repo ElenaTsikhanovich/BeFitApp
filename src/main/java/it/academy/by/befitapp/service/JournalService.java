@@ -30,7 +30,7 @@ public class JournalService implements IJournalService {
 
     @Override
     public Journal get(Long idProfile,JournalSearchDto journalSearchDto) {
-        Journal byProfileIdAndId = this.iJournalDao.findByProfileIdAndId(idProfile, journalSearchDto.getIdFood());
+        Journal byProfileIdAndId = this.iJournalDao.findJournalByProfileIdAndId(idProfile, journalSearchDto.getIdFood());
         return byProfileIdAndId;
     }
 
@@ -54,7 +54,6 @@ public class JournalService implements IJournalService {
         dairy.setProfile(profile);
         Journal saveDairy = this.iJournalDao.save(dairy);
         Long saveDairyId = saveDairy.getId();
-        this.iAuditService.save(EAuditAction.SAVE, EntityType.DAIRY, id);
         return saveDairyId;
     }
 
@@ -69,12 +68,10 @@ public class JournalService implements IJournalService {
         LocalDateTime updateTime = LocalDateTime.now();
         dairyForUpdate.setUpdateTime(updateTime);
         this.iJournalDao.save(dairyForUpdate);
-        this.iAuditService.save(EAuditAction.UPDATE, EntityType.DAIRY, id);
     }
 
     @Override
     public void delete(Long id) {
         this.iJournalDao.deleteById(id);
-        this.iAuditService.save(EAuditAction.DELETE, EntityType.DAIRY, id);
     }
 }

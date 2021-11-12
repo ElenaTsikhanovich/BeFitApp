@@ -2,11 +2,11 @@ package it.academy.by.befitapp.dto;
 
 import java.time.LocalDateTime;
 
-public class ExercisesSearchDto extends ListDto{
+public class ExercisesAndWeightSearchDto extends ListDto{
     private LocalDateTime start;
     private LocalDateTime end;
 
-    public ExercisesSearchDto(){
+    public ExercisesAndWeightSearchDto(){
 
     }
 

@@ -18,24 +18,9 @@ public class AuditService implements IAuditService {
     }
 
     @Override
-    public Long save(EAuditAction eAuditAction, EntityType entityType, Long entityId) {
-        Audit audit = new Audit();
-        LocalDateTime createTime = LocalDateTime.now();
-        audit.setCreateTime(createTime);
-        //set user
-        audit.setEntityType(entityType);
-        audit.setEntityId(entityId);
-        if(eAuditAction.equals(EAuditAction.SAVE)){
-            audit.setText("Пользователь добавил запись");
-        }
-        if(eAuditAction.equals(EAuditAction.UPDATE)){
-            audit.setText("Пользователь отредактировал запись");
-        }
-        if(eAuditAction.equals(EAuditAction.DELETE)){
-            audit.setText("Пользователь удалил запись");
-        }
-        Audit saveAudit = this.iAuditDao.save(audit);
-        return saveAudit.getId();
+    public Long save(Audit audit) {
+        Audit savedAudit = this.iAuditDao.save(audit);
+        return savedAudit.getId();
     }
 
     @Override

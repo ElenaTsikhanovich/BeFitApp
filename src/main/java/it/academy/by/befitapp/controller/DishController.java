@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 
 @RestController
 @RequestMapping("/api/recipe")
@@ -32,7 +34,8 @@ public class DishController {
         listDto.setPage(page);
         listDto.setSize(size);
         listDto.setName(name);
-        Page<Dish> dishes = this.iDishService.getAll(listDto);
+        Page<Dish> dishesPage = this.iDishService.getAll(listDto);
+        List<Dish> dishes = dishesPage.getContent();
         return new ResponseEntity<>(dishes,HttpStatus.OK);
     }
 

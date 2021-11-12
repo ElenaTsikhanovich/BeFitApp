@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/profile/{id_profile}/journal/food")
 public class JournalController {
@@ -33,8 +35,9 @@ public class JournalController {
                                  @PathVariable("day")Integer day){
         JournalSearchDto journalSearchDto = new JournalSearchDto();
         journalSearchDto.setDay(day);
-        Page<Journal> dairies = this.iJournalService.getAll(idProfile, journalSearchDto);
-        return new ResponseEntity<>(dairies, HttpStatus.OK);
+        Page<Journal> journalPage = this.iJournalService.getAll(idProfile, journalSearchDto);
+        List<Journal> journals = journalPage.getContent();
+        return new ResponseEntity<>(journals, HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/{id_food}")

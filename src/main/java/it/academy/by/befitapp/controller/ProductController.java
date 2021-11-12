@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/product")
 public class ProductController {
@@ -36,7 +38,7 @@ public class ProductController {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public ResponseEntity<Page<Product>> getAll(@RequestParam (value = "page",required = false, defaultValue = "0")Integer page,
+    public ResponseEntity<?> getAll(@RequestParam (value = "page",required = false, defaultValue = "0")Integer page,
                                                 @RequestParam(value = "size",required = false, defaultValue = "30")Integer size,
                                                 @RequestParam(value = "name",required = false)String name,
                                                 @RequestParam(value = "brand",required = false)String brand,
@@ -49,7 +51,8 @@ public class ProductController {
         productSearchDto.setBrand(brand);
         productSearchDto.setCaloriesAfter(caloriesAfter);
         productSearchDto.setCaloriesBefore(caloriesBefore);
-        Page<Product> products = this.iProductService.getAll(productSearchDto);
+        Page<Product> productsPage = this.iProductService.getAll(productSearchDto);
+        List<Product> products = productsPage.getContent();
         return new ResponseEntity<>(products,HttpStatus.OK);
     }
 

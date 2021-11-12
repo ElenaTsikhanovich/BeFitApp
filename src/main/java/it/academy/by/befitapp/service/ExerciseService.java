@@ -1,9 +1,7 @@
 package it.academy.by.befitapp.service;
 
 import it.academy.by.befitapp.dao.api.IExerciseDao;
-import it.academy.by.befitapp.dto.ExercisesSearchDto;
-import it.academy.by.befitapp.dto.ListDto;
-import it.academy.by.befitapp.model.Audit;
+import it.academy.by.befitapp.dto.ExercisesAndWeightSearchDto;
 import it.academy.by.befitapp.model.Exercise;
 import it.academy.by.befitapp.model.Profile;
 import it.academy.by.befitapp.model.api.EAuditAction;
@@ -17,16 +15,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
+
 @Service
 public class ExerciseService implements IExercisesService {
     private final IExerciseDao iExerciseDao;
-    private final IAuditService iAuditService;
     private final IProfileService iProfileService;
 
-    public ExerciseService(IExerciseDao iExerciseDao, IAuditService iAuditService, IProfileService iProfileService) {
+    public ExerciseService(IExerciseDao iExerciseDao, IProfileService iProfileService) {
         this.iExerciseDao = iExerciseDao;
-        this.iAuditService = iAuditService;
         this.iProfileService = iProfileService;
     }
 
@@ -37,17 +33,17 @@ public class ExerciseService implements IExercisesService {
     }
 
     @Override
-    public Page<Exercise> getAll(Long id, ExercisesSearchDto exercisesSearchDto) {
-        Pageable pageable= PageRequest.of(exercisesSearchDto.getPage(), exercisesSearchDto.getSize());
-        if(exercisesSearchDto.getStart()!=null && exercisesSearchDto.getEnd()!=null){
+    public Page<Exercise> getAll(Long id, ExercisesAndWeightSearchDto exercisesAndWeightSearchDto) {
+        Pageable pageable= PageRequest.of(exercisesAndWeightSearchDto.getPage(), exercisesAndWeightSearchDto.getSize());
+        if(exercisesAndWeightSearchDto.getStart()!=null && exercisesAndWeightSearchDto.getEnd()!=null){
             return this.iExerciseDao.findExerciseByUpdateTimeBetween(
-                    exercisesSearchDto.getStart(),exercisesSearchDto.getEnd(),pageable);
+                    exercisesAndWeightSearchDto.getStart(), exercisesAndWeightSearchDto.getEnd(),pageable);
         }
-        if(exercisesSearchDto.getStart()!=null){
-            return this.iExerciseDao.findExerciseByUpdateTimeAfter(exercisesSearchDto.getStart(),pageable);
+        if(exercisesAndWeightSearchDto.getStart()!=null){
+            return this.iExerciseDao.findExerciseByUpdateTimeAfter(exercisesAndWeightSearchDto.getStart(),pageable);
         }
-        if(exercisesSearchDto.getEnd()!=null){
-            return this.iExerciseDao.findExerciseByUpdateTimeBefore(exercisesSearchDto.getEnd(),pageable);
+        if(exercisesAndWeightSearchDto.getEnd()!=null){
+            return this.iExerciseDao.findExerciseByUpdateTimeBefore(exercisesAndWeightSearchDto.getEnd(),pageable);
         }
         Page<Exercise> allByProfileId = this.iExerciseDao.findAllByProfileId(id, pageable);
         return allByProfileId;
@@ -62,7 +58,6 @@ public class ExerciseService implements IExercisesService {
         exercise.setProfile(profile);
         Exercise saveExercise = this.iExerciseDao.save(exercise);
         Long saveId = saveExercise.getId();
-        this.iAuditService.save(EAuditAction.SAVE, EntityType.EXERCISES, id);
         return saveId;
     }
 
@@ -74,12 +69,10 @@ public class ExerciseService implements IExercisesService {
         LocalDateTime updateTime = LocalDateTime.now();
         exerciseForUpdate.setUpdateTime(updateTime);
         this.iExerciseDao.save(exerciseForUpdate);
-        this.iAuditService.save(EAuditAction.UPDATE, EntityType.EXERCISES, id);
     }
 
     @Override
     public void delete(Long id) {
         this.iExerciseDao.deleteById(id);
-        this.iAuditService.save(EAuditAction.DELETE, EntityType.EXERCISES, id);
     }
 }

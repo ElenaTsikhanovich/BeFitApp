@@ -1,6 +1,6 @@
 package it.academy.by.befitapp.model;
 
-import it.academy.by.befitapp.model.api.UserRole;
+import it.academy.by.befitapp.model.api.Role;
 import it.academy.by.befitapp.model.api.UserStatus;
 
 import javax.persistence.*;
@@ -25,7 +25,7 @@ public class User implements Serializable {
     private String password;
 
     @Column(name = "role")
-    private UserRole role;
+    private Role role;
 
     @Column(name = "user_status")
     private UserStatus userStatus;
@@ -36,7 +36,7 @@ public class User implements Serializable {
     @Column(name = "updateTime")
     private LocalDateTime updateTime;
 
-    public User (){
+    public User() {
 
     }
 
@@ -72,11 +72,11 @@ public class User implements Serializable {
         this.password = password;
     }
 
-    public UserRole getRole() {
+    public Role getRole() {
         return role;
     }
 
-    public void setRole(UserRole role) {
+    public void setRole(Role role) {
         this.role = role;
     }
 
@@ -103,4 +103,6 @@ public class User implements Serializable {
     public void setUserStatus(UserStatus userStatus) {
         this.userStatus = userStatus;
     }
+
+
 }

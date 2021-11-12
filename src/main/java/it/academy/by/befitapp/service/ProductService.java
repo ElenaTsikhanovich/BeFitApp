@@ -3,26 +3,34 @@ package it.academy.by.befitapp.service;
 import it.academy.by.befitapp.dao.api.IProductDao;
 import it.academy.by.befitapp.dto.ProductSearchDto;
 import it.academy.by.befitapp.model.Product;
+import it.academy.by.befitapp.model.User;
 import it.academy.by.befitapp.model.api.EAuditAction;
 import it.academy.by.befitapp.model.api.EntityType;
+import it.academy.by.befitapp.security.UserHolder;
 import it.academy.by.befitapp.service.api.IAuditService;
 import it.academy.by.befitapp.service.api.IProductService;
+import it.academy.by.befitapp.service.api.IUserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 public class ProductService implements IProductService {
     private final IProductDao iProductDao;
-    private final IAuditService iAuditService;
+    private final UserHolder userHolder;
+    private final IUserService iUserService;
 
-    public ProductService(IProductDao iProductDao, IAuditService iAuditService) {
+    public ProductService(IProductDao iProductDao, UserHolder userHolder, IUserService iUserService) {
         this.iProductDao = iProductDao;
-        this.iAuditService = iAuditService;
+        this.userHolder = userHolder;
+        this.iUserService = iUserService;
     }
 
     @Override
@@ -61,18 +69,23 @@ public class ProductService implements IProductService {
 
     @Override
     public Long save(Product product) {
+        String userLogin = this.userHolder.getAuthentication().getName();
+        User userByLogin = this.iUserService.getByLogin(userLogin);
+        product.setUserWhoUpdate(userByLogin);
         LocalDateTime createTime = LocalDateTime.now();
         product.setCreateTime(createTime);
         product.setUpdateTime(createTime);
         Product savedProduct = this.iProductDao.save(product);
         Long id = savedProduct.getId();
-        this.iAuditService.save(EAuditAction.SAVE, EntityType.PRODUCT, id);
         return id;
     }
 
     @Override
     public void update(Product product, Long id) {
         Product productForUpdate = get(id);
+        String userLogin = this.userHolder.getAuthentication().getName();
+        User userByLogin = this.iUserService.getByLogin(userLogin);
+        productForUpdate.setUserWhoUpdate(userByLogin);
         productForUpdate.setName(product.getName());
         productForUpdate.setBrand(product.getBrand());
         productForUpdate.setCalories(product.getCalories());
@@ -83,13 +96,11 @@ public class ProductService implements IProductService {
         LocalDateTime updateTime = LocalDateTime.now();
         productForUpdate.setUpdateTime(updateTime);
         this.iProductDao.save(productForUpdate);
-        this.iAuditService.save(EAuditAction.UPDATE, EntityType.PRODUCT, id);
     }
 
     @Override
     public void delete(Long id) {
         iProductDao.deleteById(id);
-        this.iAuditService.save(EAuditAction.DELETE, EntityType.PRODUCT, id);
     }
 
 

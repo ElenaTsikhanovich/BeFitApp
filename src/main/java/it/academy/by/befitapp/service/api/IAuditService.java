@@ -10,5 +10,5 @@ import java.util.List;
 public interface IAuditService {
     Audit get(Long id);
     List<Audit> getAll();
-    Long save(EAuditAction eAuditAction, EntityType entityType, Long entityId); // еще юзера сюда добавить
+    Long save(Audit audit);
 }

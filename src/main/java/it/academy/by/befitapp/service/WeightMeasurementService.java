@@ -1,6 +1,7 @@
 package it.academy.by.befitapp.service;
 
 import it.academy.by.befitapp.dao.api.IWeightMeasurementDao;
+import it.academy.by.befitapp.dto.ExercisesAndWeightSearchDto;
 import it.academy.by.befitapp.dto.ListDto;
 import it.academy.by.befitapp.model.Profile;
 import it.academy.by.befitapp.model.WeightMeasurement;
@@ -16,22 +17,38 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class WeightMeasurementService implements IWeightMeasurementService {
     private final IWeightMeasurementDao iWeightMeasurementDao;
-    private final IAuditService iAuditService;
     private final IProfileService iProfileService;
 
-    public WeightMeasurementService(IWeightMeasurementDao iWeightMeasurementDao, IAuditService iAuditService, IProfileService iProfileService) {
+    public WeightMeasurementService(IWeightMeasurementDao iWeightMeasurementDao, IProfileService iProfileService) {
         this.iWeightMeasurementDao = iWeightMeasurementDao;
-        this.iAuditService = iAuditService;
         this.iProfileService = iProfileService;
     }
 
     @Override
-    public Page<WeightMeasurement> get(Long id, ListDto listDto) {
-        Pageable pageable= PageRequest.of(listDto.getPage(), listDto.getSize());
+    public WeightMeasurement get(Long profileId, Long id) {
+        WeightMeasurement weightMeasurementByProfileIdAndId =
+                this.iWeightMeasurementDao.findWeightMeasurementByProfileIdAndId(profileId, id);
+        return weightMeasurementByProfileIdAndId;
+    }
+
+    @Override
+    public Page<WeightMeasurement> getAll(Long id, ExercisesAndWeightSearchDto exercisesAndWeightSearchDto) {
+        Pageable pageable = PageRequest.of(exercisesAndWeightSearchDto.getPage(), exercisesAndWeightSearchDto.getSize());
+        if (exercisesAndWeightSearchDto.getStart() != null && exercisesAndWeightSearchDto.getEnd() != null) {
+            return this.iWeightMeasurementDao.findWeightMeasurementByUpdateTimeBetween(
+                    exercisesAndWeightSearchDto.getStart(), exercisesAndWeightSearchDto.getEnd(), pageable);
+        }
+        if (exercisesAndWeightSearchDto.getStart() != null) {
+            return this.iWeightMeasurementDao.findWeightMeasurementByUpdateTimeAfter(exercisesAndWeightSearchDto.getStart(), pageable);
+        }
+        if (exercisesAndWeightSearchDto.getEnd() != null) {
+            return this.iWeightMeasurementDao.findWeightMeasurementByUpdateTimeBefore(exercisesAndWeightSearchDto.getEnd(), pageable);
+        }
         Page<WeightMeasurement> allByProfileId = this.iWeightMeasurementDao.findAllByProfileId(id, pageable);
         return allByProfileId;
     }
@@ -44,11 +61,10 @@ public class WeightMeasurementService implements IWeightMeasurementService {
         Profile profile = this.iProfileService.get(id);
         profile.setUpdateTime(createTime);
         profile.setWeightActual(weightMeasurement.getWeight());
-        this.iProfileService.update(profile,id);
+        this.iProfileService.update(profile, id);
         weightMeasurement.setProfile(profile);
         WeightMeasurement saveWeightMeasurement = this.iWeightMeasurementDao.save(weightMeasurement);
         Long saveId = saveWeightMeasurement.getId();
-        this.iAuditService.save(EAuditAction.SAVE,EntityType.WEIGHT_MEASUREMENT, saveId);
         return saveId;
     }
 
@@ -59,12 +75,10 @@ public class WeightMeasurementService implements IWeightMeasurementService {
         LocalDateTime updateTime = LocalDateTime.now();
         weightMeasurementForUpdate.setUpdateTime(updateTime);
         this.iWeightMeasurementDao.save(weightMeasurementForUpdate);
-        this.iAuditService.save(EAuditAction.UPDATE, EntityType.WEIGHT_MEASUREMENT, id);
     }
 
     @Override
     public void delete(Long id) {
         this.iWeightMeasurementDao.deleteById(id);
-        this.iAuditService.save(EAuditAction.DELETE, EntityType.WEIGHT_MEASUREMENT, id);
     }
 }

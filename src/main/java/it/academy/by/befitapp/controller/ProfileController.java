@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 
 @RestController
 @RequestMapping("/api/profile")
@@ -30,7 +32,8 @@ public class ProfileController {
         ListDto listDto = new ListDto();
         listDto.setPage(page);
         listDto.setSize(size);
-        Page<Profile> profiles = this.iProfileService.getAll(listDto);
+        Page<Profile> profilePage = this.iProfileService.getAll(listDto);
+        List<Profile> profiles = profilePage.getContent();
         return new ResponseEntity<>(profiles,HttpStatus.OK);
     }
 

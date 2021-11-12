@@ -2,11 +2,15 @@ package it.academy.by.befitapp.service;
 
 import it.academy.by.befitapp.dao.api.IProfileDao;
 import it.academy.by.befitapp.dto.ListDto;
+import it.academy.by.befitapp.dto.LoginDto;
 import it.academy.by.befitapp.model.Profile;
+import it.academy.by.befitapp.model.User;
 import it.academy.by.befitapp.model.api.EAuditAction;
 import it.academy.by.befitapp.model.api.EntityType;
+import it.academy.by.befitapp.security.UserHolder;
 import it.academy.by.befitapp.service.api.IAuditService;
 import it.academy.by.befitapp.service.api.IProfileService;
+import it.academy.by.befitapp.service.api.IUserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,11 +21,13 @@ import java.time.LocalDateTime;
 @Service
 public class ProfileService implements IProfileService {
     private final IProfileDao iProfileDao;
-    private final IAuditService iAuditService;
+    private final UserHolder userHolder;
+    private final IUserService iUserService;
 
-    public ProfileService(IProfileDao iProfileDao, IAuditService iAuditService) {
+    public ProfileService(IProfileDao iProfileDao, UserHolder userHolder, IUserService iUserService) {
         this.iProfileDao = iProfileDao;
-        this.iAuditService = iAuditService;
+        this.userHolder = userHolder;
+        this.iUserService = iUserService;
     }
 
     @Override
@@ -40,12 +46,14 @@ public class ProfileService implements IProfileService {
 
     @Override
     public Long save(Profile profile) {
+        String userLogin = this.userHolder.getAuthentication().getName();
+        User userByLogin = this.iUserService.getByLogin(userLogin); //как варриант из холдера возвращать сразу юзера целого
+        profile.setUser(userByLogin);
         LocalDateTime createTime = LocalDateTime.now();
         profile.setCreateTime(createTime);
         profile.setUpdateTime(createTime);
         Profile saveProfile = this.iProfileDao.save(profile);
         Long id = saveProfile.getId();
-        this.iAuditService.save(EAuditAction.SAVE, EntityType.PROFILE, id);
         return id;
     }
 
@@ -62,12 +70,10 @@ public class ProfileService implements IProfileService {
         LocalDateTime updateTime = LocalDateTime.now();
         profileForUpdate.setUpdateTime(updateTime);
         this.iProfileDao.save(profileForUpdate);
-        this.iAuditService.save(EAuditAction.UPDATE, EntityType.PROFILE, id);
     }
 
     @Override
     public void delete(Long id) {
         this.iProfileDao.deleteById(id);
-        this.iAuditService.save(EAuditAction.DELETE, EntityType.PROFILE, id);
     }
 }

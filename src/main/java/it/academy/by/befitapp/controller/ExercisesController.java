@@ -1,6 +1,6 @@
 package it.academy.by.befitapp.controller;
 
-import it.academy.by.befitapp.dto.ExercisesSearchDto;
+import it.academy.by.befitapp.dto.ExercisesAndWeightSearchDto;
 import it.academy.by.befitapp.model.Exercise;
 import it.academy.by.befitapp.service.api.IExercisesService;
 import org.springframework.data.domain.Page;
@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 @RestController
@@ -29,12 +30,13 @@ public class ExercisesController {
                                         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
                                  @RequestParam(value = "dt_end",required = false)
                                         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end){
-        ExercisesSearchDto exercisesSearchDto = new ExercisesSearchDto();
-        exercisesSearchDto.setPage(page);
-        exercisesSearchDto.setSize(size);
-        exercisesSearchDto.setStart(start);
-        exercisesSearchDto.setEnd(end);
-        Page<Exercise> exercises = this.iExercisesService.getAll(id, exercisesSearchDto);
+        ExercisesAndWeightSearchDto exercisesAndWeightSearchDto = new ExercisesAndWeightSearchDto();
+        exercisesAndWeightSearchDto.setPage(page);
+        exercisesAndWeightSearchDto.setSize(size);
+        exercisesAndWeightSearchDto.setStart(start);
+        exercisesAndWeightSearchDto.setEnd(end);
+        Page<Exercise> exercisesPage = this.iExercisesService.getAll(id, exercisesAndWeightSearchDto);
+        List<Exercise> exercises = exercisesPage.getContent();
         return new ResponseEntity<>(exercises, HttpStatus.OK);
     }
 

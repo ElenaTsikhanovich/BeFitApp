@@ -7,6 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface IJournalDao extends JpaRepository<Journal,Long> {
     Page<Journal> findAllByProfileId(Long profileId, Pageable pageable);
-    Journal findByProfileIdAndId(Long profileId, Long id);
+    Journal findJournalByProfileIdAndId(Long profileId, Long id);
 
 }
