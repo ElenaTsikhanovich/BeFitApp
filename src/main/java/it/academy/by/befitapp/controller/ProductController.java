@@ -3,7 +3,7 @@ package it.academy.by.befitapp.controller;
 import it.academy.by.befitapp.dto.NutrientDto;
 import it.academy.by.befitapp.dto.ProductSearchDto;
 import it.academy.by.befitapp.model.Product;
-import it.academy.by.befitapp.service.api.ICalculatorService;
+import it.academy.by.befitapp.utils.ICalculator;
 import it.academy.by.befitapp.service.api.IProductService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -16,11 +16,11 @@ import java.util.List;
 @RequestMapping("/api/product")
 public class ProductController {
     private final IProductService iProductService;
-    private final ICalculatorService iCalculatorService;
+    private final ICalculator iCalculator;
 
-    public ProductController(IProductService iProductService, ICalculatorService iCalculatorService) {
+    public ProductController(IProductService iProductService, ICalculator iCalculator) {
         this.iProductService = iProductService;
-        this.iCalculatorService = iCalculatorService;
+        this.iCalculator = iCalculator;
     }
 
     @RequestMapping(method = RequestMethod.GET,value = "/{id}")
@@ -28,11 +28,8 @@ public class ProductController {
                                  @RequestParam(value = "weight",required = false) Double weight) {
         Product product = this.iProductService.get(id);
         if(weight!=null){
-            NutrientDto nutrientDto = new NutrientDto();
-            nutrientDto.setName(product.getName());
-            nutrientDto.setWeight(weight);
-            NutrientDto nutrientDtoFull = this.iCalculatorService.nutrientsInProduct(nutrientDto,product);
-            return new ResponseEntity<>(nutrientDtoFull, HttpStatus.OK);
+            NutrientDto nutrientDto = this.iCalculator.nutrientsInProduct(product,weight);
+            return new ResponseEntity<>(nutrientDto, HttpStatus.OK);
         }
         return new ResponseEntity<>(product, HttpStatus.OK);
     }

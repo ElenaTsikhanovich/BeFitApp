@@ -2,11 +2,14 @@ package it.academy.by.befitapp.controller;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import it.academy.by.befitapp.dto.ListDto;
 import it.academy.by.befitapp.dto.LoginDto;
 import it.academy.by.befitapp.dto.UserDto;
 import it.academy.by.befitapp.model.User;
 import it.academy.by.befitapp.service.api.IUserService;
 
+import it.academy.by.befitapp.service.validator.DataValidator;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
@@ -22,29 +25,43 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/users")
 public class UserController {
     private final IUserService iUserService;
+    private final DataValidator dataValidator;
 
-    public UserController(IUserService iUserService) {
+    public UserController(IUserService iUserService, DataValidator dataValidator) {
         this.iUserService = iUserService;
-    }
-/*
-    @RequestMapping(method = RequestMethod.GET, value = "/{id}")
-    public ResponseEntity<?> get(@PathVariable("id") Long id){
-        User user = this.iUserService.get(id);
-        return new ResponseEntity<>(user, HttpStatus.OK);
+        this.dataValidator = dataValidator;
     }
 
+    /*
+        @RequestMapping(method = RequestMethod.GET, value = "/{id}")
+        public ResponseEntity<?> get(@PathVariable("id") Long id){
+            User user = this.iUserService.get(id);
+            return new ResponseEntity<>(user, HttpStatus.OK);
+        }
+
+        @RequestMapping(method = RequestMethod.GET)
+        public ResponseEntity<?> getAll(@RequestParam (value = "page",required = false, defaultValue = "0")Integer page,
+                                        @RequestParam(value = "size",required = false, defaultValue = "30")Integer size){
+            ListDto listDto = new ListDto();
+            listDto.setPage(page);
+            listDto.setSize(size);
+            Page<User> users = this.iUserService.getAll(listDto);
+            return new ResponseEntity<>(users, HttpStatus.OK);
+        }
+
+
+     */
     @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<?> getAll(@RequestParam (value = "page",required = false, defaultValue = "0")Integer page,
                                     @RequestParam(value = "size",required = false, defaultValue = "30")Integer size){
         ListDto listDto = new ListDto();
         listDto.setPage(page);
         listDto.setSize(size);
-        Page<User> users = this.iUserService.getAll(listDto);
+        Page<User> usersPage = this.iUserService.getAll(listDto);
+        List<User> users = usersPage.getContent();
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
-
- */
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<?> login(@RequestBody LoginDto loginDto) {
         User byLogin = this.iUserService.getByLoginAndPassword(loginDto);
@@ -60,6 +77,17 @@ public class UserController {
 
     @RequestMapping(method = RequestMethod.POST,value = "/registration")
     public ResponseEntity<?> save(@RequestBody User user){
+        if (this.iUserService.getByLogin(user.getLogin())!=null){
+            return new ResponseEntity<>("Этот логин уже используется",HttpStatus.OK);
+        }
+        if (!this.dataValidator.isEmailValid(user.getLogin())){
+            return new ResponseEntity<>("Некорретно введен адрес электронной почты", HttpStatus.OK);
+        }
+        if (!this.dataValidator.isPasswordValid(user.getPassword())){
+            return new ResponseEntity<>("Пароль должен содедержать не менее восьми символов, " +
+                    "хотя бы одну букву нижнего и верхнего регистра, хотя бы один специальный символ \"@#_$%^&+=\"",
+                    HttpStatus.OK);
+        }
         Long userId = this.iUserService.save(user);
         //отправка письма и изменение статуса
         //перенеправление опять на вход
@@ -72,12 +100,6 @@ public class UserController {
                                     @RequestBody User user){
         //теже валидации что и пр регистрации
         this.iUserService.update(user, id);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    @RequestMapping(method = RequestMethod.DELETE, value = "/{id}")
-    public ResponseEntity<?> delete(@PathVariable("id") Long id) {
-        this.iUserService.delete(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -100,7 +122,6 @@ public class UserController {
                 .signWith(SignatureAlgorithm.HS512, secretKey.getBytes()).compact();
 
         return "Bearer" + token;
-
     }
 
 

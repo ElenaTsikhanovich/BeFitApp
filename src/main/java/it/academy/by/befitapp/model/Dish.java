@@ -26,7 +26,7 @@ public class Dish implements Serializable {
   private LocalDateTime updateTime;
 
   @OneToOne(fetch = FetchType.EAGER)
-  private User userWhoUpdate;
+  private User userWhoCreate;
 
   public Dish(){
 
@@ -72,11 +72,11 @@ public class Dish implements Serializable {
     this.updateTime = updateTime;
   }
 
-  public User getUser() {
-    return userWhoUpdate;
+  public User getUserWhoCreate() {
+    return userWhoCreate;
   }
 
-  public void setUser(User user) {
-    this.userWhoUpdate = userWhoUpdate;
+  public void setUserWhoCreate(User userWhoCreate) {
+    this.userWhoCreate = userWhoCreate;
   }
 }

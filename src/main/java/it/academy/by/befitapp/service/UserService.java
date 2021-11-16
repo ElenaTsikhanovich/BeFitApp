@@ -4,12 +4,10 @@ import it.academy.by.befitapp.dao.api.IUserDao;
 import it.academy.by.befitapp.dto.ListDto;
 import it.academy.by.befitapp.dto.LoginDto;
 import it.academy.by.befitapp.model.User;
-import it.academy.by.befitapp.model.api.EAuditAction;
-import it.academy.by.befitapp.model.api.EntityType;
 import it.academy.by.befitapp.model.api.Role;
 import it.academy.by.befitapp.model.api.UserStatus;
-import it.academy.by.befitapp.service.api.IAuditService;
 import it.academy.by.befitapp.service.api.IUserService;
+import it.academy.by.befitapp.service.validator.DataValidator;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -43,7 +41,7 @@ public class UserService implements IUserService {
         LocalDateTime createTime = LocalDateTime.now();
         user.setCreateTime(createTime);
         user.setUpdateTime(createTime);
-        user.setRole(Role.ROLE_USER);
+        user.setRole(Role.USER);
         user.setUserStatus(UserStatus.NO_ACTIVE);
         User saveUser = this.iUserDao.save(user); // при регистрации отправляется письмо на почту
         Long id = saveUser.getId();
@@ -52,21 +50,15 @@ public class UserService implements IUserService {
 
     @Override
     public void update(User user, Long id) {
-        User userForUpdate = get(id);
-        userForUpdate.setName(user.getName());
-        userForUpdate.setLogin(user.getLogin());
-        userForUpdate.setPassword(user.getPassword());
-        userForUpdate.setRole(user.getRole());// только администратор может это делать
-        userForUpdate.setUserStatus(user.getUserStatus()); //меняется на активен после активации
-        LocalDateTime updateTime = LocalDateTime.now();
-        userForUpdate.setUpdateTime(updateTime);
-        this.iUserDao.save(userForUpdate);
+        User userFromBd = get(id);
+        user.setId(id);
+        user.setUserStatus(UserStatus.ACTIVE);
+        user.setCreateTime(userFromBd.getCreateTime());
+        user.setUpdateTime(LocalDateTime.now());
+        user.setRole(userFromBd.getRole());
+        this.iUserDao.save(user);
     }
 
-    @Override
-    public void delete(Long id) {
-        this.iUserDao.deleteById(id);
-    }
 
     @Override
     public User getByLoginAndPassword(LoginDto loginDto) {

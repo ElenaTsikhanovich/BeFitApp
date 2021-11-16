@@ -27,8 +27,8 @@ public class ExerciseService implements IExercisesService {
     }
 
     @Override
-    public Exercise get(Long idProfile, Long id) {
-        Exercise exerciseByProfileIdAndId = this.iExerciseDao.findExerciseByProfileIdAndId(idProfile, id);
+    public Exercise get(Long idProfile, Long idActive) {
+        Exercise exerciseByProfileIdAndId = this.iExerciseDao.findExerciseByProfileIdAndId(idProfile, idActive);
         return exerciseByProfileIdAndId;
     }
 
@@ -62,13 +62,14 @@ public class ExerciseService implements IExercisesService {
     }
 
     @Override
-    public void update(Exercise exercise, Long id) {
-        Exercise exerciseForUpdate = this.iExerciseDao.findById(id).get();
-        exerciseForUpdate.setName(exercise.getName());
-        exerciseForUpdate.setCalories(exercise.getCalories());
-        LocalDateTime updateTime = LocalDateTime.now();
-        exerciseForUpdate.setUpdateTime(updateTime);
-        this.iExerciseDao.save(exerciseForUpdate);
+    public void update(Exercise exercise, Long idProfile,Long idActive) {
+        Exercise exerciseFromBd = get(idProfile, idActive);
+        exercise.setId(exerciseFromBd.getId());
+        exercise.setCreateTime(exerciseFromBd.getCreateTime());
+        exercise.setUpdateTime(LocalDateTime.now());
+        Profile profile = this.iProfileService.get(idProfile);
+        exercise.setProfile(profile);
+        this.iExerciseDao.save(exercise);
     }
 
     @Override

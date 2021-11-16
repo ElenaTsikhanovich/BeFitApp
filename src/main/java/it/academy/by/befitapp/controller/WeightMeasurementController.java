@@ -55,16 +55,20 @@ public class WeightMeasurementController {
         return new ResponseEntity<>(weightMeasurementId, HttpStatus.CREATED);
     }
 
-    @RequestMapping(method = RequestMethod.PUT)
-    public ResponseEntity<?> update(@PathVariable("id_profile") Long id,
+    @RequestMapping(method = RequestMethod.PUT, value = "/{id_weight}/dt_update/{dt_update}")
+    public ResponseEntity<?> update(@PathVariable("id_profile") Long idProfile,
+                                    @PathVariable("id_weight")Long idWeight,
+                                    @PathVariable("dt_update")Long dtUpdate,
                                     @RequestBody WeightMeasurement weightMeasurement) {
-        this.iWeightMeasurementService.update(weightMeasurement, id);
+        this.iWeightMeasurementService.update(weightMeasurement, idProfile, idWeight);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @RequestMapping(method = RequestMethod.DELETE, value = "/{id}")
-    public ResponseEntity<?> delete(@PathVariable("id") Long id) {
-        this.iWeightMeasurementService.delete(id);
+    @RequestMapping(method = RequestMethod.DELETE, value = "/{id_weight}/dt_update/{dt_update}")
+    public ResponseEntity<?> delete(@PathVariable("id_profile") Long idProfile,
+                                    @PathVariable("id_weight")Long idWeight,
+                                    @PathVariable("dt_update")Long dtUpdate) {
+        this.iWeightMeasurementService.delete(idWeight);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

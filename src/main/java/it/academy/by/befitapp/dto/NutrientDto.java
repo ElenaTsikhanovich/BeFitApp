@@ -1,7 +1,12 @@
 package it.academy.by.befitapp.dto;
 
+import it.academy.by.befitapp.model.Dish;
+import it.academy.by.befitapp.model.Product;
+import it.academy.by.befitapp.model.Profile;
+
 public class NutrientDto {
-    private String name;
+    private Product product;
+    private Dish dish;
     private Double weight;
     private Double calories;
     private Double protein;
@@ -12,12 +17,20 @@ public class NutrientDto {
 
     }
 
-    public String getName() {
-        return name;
+    public Product getProduct() {
+        return product;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setProduct(Product product) {
+        this.product = product;
+    }
+
+    public Dish getDish() {
+        return dish;
+    }
+
+    public void setDish(Dish dish) {
+        this.dish = dish;
     }
 
     public Double getWeight() {

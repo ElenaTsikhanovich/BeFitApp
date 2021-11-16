@@ -18,9 +18,13 @@ import java.time.LocalDateTime;
 @Service
 public class UserAuditService {
     private final IAuditService iAuditService;
+    private final UserHolder userHolder;
+    private final IUserService iUserService;
 
-    public UserAuditService(IAuditService iAuditService, IUserService iUserService) {
+    public UserAuditService(IAuditService iAuditService, UserHolder userHolder, IUserService iUserService) {
         this.iAuditService = iAuditService;
+        this.userHolder = userHolder;
+        this.iUserService = iUserService;
     }
 
     @After("execution(* it.academy.by.befitapp.service.UserService.save(..))")
@@ -31,7 +35,6 @@ public class UserAuditService {
             Audit audit = new Audit();
             audit.setCreateTime(user.getUpdateTime());
             audit.setText("Пользователь "+user.getName()+" зарегистрировался в приложении!");
-            audit.setUser(user);
             audit.setEntityType(EntityType.USER);
             audit.setEntityId(user.getId());
             this.iAuditService.save(audit);
@@ -48,7 +51,9 @@ public class UserAuditService {
             Audit audit = new Audit();
             audit.setCreateTime(user.getUpdateTime());
             audit.setText("Пользователь "+user.getName()+" обновил данные!");
-            audit.setUser(user);
+            String userLogin = this.userHolder.getAuthentication().getName();
+            User userByLogin = this.iUserService.getByLogin(userLogin);
+            audit.setUser(userByLogin);
             audit.setEntityType(EntityType.USER);
             audit.setEntityId(user.getId());
             this.iAuditService.save(audit);

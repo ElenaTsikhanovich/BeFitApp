@@ -10,7 +10,6 @@ public interface IUserService {
     Page<User> getAll(ListDto listDto);
     Long save(User user);
     void update(User user, Long id);
-    void delete(Long id);
     User getByLoginAndPassword(LoginDto loginDto);
     User getByLogin(String login);
 }

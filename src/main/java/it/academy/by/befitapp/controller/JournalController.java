@@ -30,28 +30,30 @@ public class JournalController {
         return new ResponseEntity<>(dairies, HttpStatus.OK);
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/{day}")
+    @RequestMapping(method = RequestMethod.GET, value = "/byDay/{day}")
     public ResponseEntity<?> getAllByDay(@PathVariable("id_profile")Long idProfile,
                                  @PathVariable("day")Integer day){
         JournalSearchDto journalSearchDto = new JournalSearchDto();
         journalSearchDto.setDay(day);
         Page<Journal> journalPage = this.iJournalService.getAll(idProfile, journalSearchDto);
         List<Journal> journals = journalPage.getContent();
+        //здесь надо соединить с методом которые считает калорийность за день и вывести через модель пользователю
         return new ResponseEntity<>(journals, HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/{id_food}")
     public ResponseEntity<?> get(@PathVariable("id_profile")Long idProfile,
                                  @PathVariable("id_food") Long idFood){
-        JournalSearchDto journalSearchDto = new JournalSearchDto();
-        journalSearchDto.setIdFood(idFood);
-        Journal journal = this.iJournalService.get(idProfile, journalSearchDto);
+        Journal journal = this.iJournalService.get(idProfile, idFood);
         return new ResponseEntity<>(journal,HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<?> save(@PathVariable("id_profile")Long id,
                                   @RequestBody Journal dairy){
+        if (dairy.getProduct()!=null && dairy.getDish()!=null){
+            return new ResponseEntity<>("Вы не можете выбрать одновременно и продукт, и блюдо",HttpStatus.OK);
+        }
         Long dairyId = this.iJournalService.save(dairy, id);
         return new ResponseEntity<>(dairyId,HttpStatus.CREATED);
     }
@@ -63,7 +65,7 @@ public class JournalController {
                                     @PathVariable("id_food")Long idFood,
                                     @PathVariable("dt_update")Long dtUpdate,
                                     @RequestBody Journal dairy){
-        this.iJournalService.update(dairy,idProfile);//переписать
+        this.iJournalService.update(dairy,idProfile,idFood);//переписать
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

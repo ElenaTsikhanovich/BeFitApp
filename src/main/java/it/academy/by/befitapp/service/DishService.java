@@ -53,7 +53,7 @@ public class DishService implements IDishService {
     public Long save(Dish dish) {
         String userLogin = this.userHolder.getAuthentication().getName();
         User userByLogin = this.iUserService.getByLogin(userLogin);
-        dish.setUser(userByLogin);
+        dish.setUserWhoCreate(userByLogin);
         LocalDateTime createTime = LocalDateTime.now();
         dish.setCreateTime(createTime);
         dish.setUpdateTime(createTime);
@@ -65,16 +65,12 @@ public class DishService implements IDishService {
 
     @Override
     public void update(Dish dish, Long id) {
-        Dish dishForUpdate = get(id);
-        String userLogin = this.userHolder.getAuthentication().getName();
-        User userByLogin = this.iUserService.getByLogin(userLogin);
-        dishForUpdate.setUser(userByLogin);
-        dishForUpdate.setName(dish.getName());
-        dishForUpdate.setIngredients(dish.getIngredients());
-        saveIngredients(dish.getIngredients());
-        LocalDateTime updateTime = LocalDateTime.now();
-        dishForUpdate.setUpdateTime(updateTime);
-        this.iDishDao.save(dishForUpdate);
+        Dish dishFromBd = get(id);
+        dish.setId(id);
+        dish.setUserWhoCreate(dishFromBd.getUserWhoCreate());
+        dish.setCreateTime(dishFromBd.getCreateTime());
+        dish.setUpdateTime(LocalDateTime.now());
+        this.iDishDao.save(dish);
     }
 
     @Override

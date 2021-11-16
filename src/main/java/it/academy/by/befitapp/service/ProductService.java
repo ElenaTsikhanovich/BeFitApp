@@ -71,7 +71,7 @@ public class ProductService implements IProductService {
     public Long save(Product product) {
         String userLogin = this.userHolder.getAuthentication().getName();
         User userByLogin = this.iUserService.getByLogin(userLogin);
-        product.setUserWhoUpdate(userByLogin);
+        product.setUserWhoCreate(userByLogin);
         LocalDateTime createTime = LocalDateTime.now();
         product.setCreateTime(createTime);
         product.setUpdateTime(createTime);
@@ -82,20 +82,12 @@ public class ProductService implements IProductService {
 
     @Override
     public void update(Product product, Long id) {
-        Product productForUpdate = get(id);
-        String userLogin = this.userHolder.getAuthentication().getName();
-        User userByLogin = this.iUserService.getByLogin(userLogin);
-        productForUpdate.setUserWhoUpdate(userByLogin);
-        productForUpdate.setName(product.getName());
-        productForUpdate.setBrand(product.getBrand());
-        productForUpdate.setCalories(product.getCalories());
-        productForUpdate.setProtein(product.getProtein());
-        productForUpdate.setFat(product.getFat());
-        productForUpdate.setCarbohydrates(product.getCarbohydrates());
-        productForUpdate.setWeight(product.getWeight());
-        LocalDateTime updateTime = LocalDateTime.now();
-        productForUpdate.setUpdateTime(updateTime);
-        this.iProductDao.save(productForUpdate);
+        Product productFromBd = get(id);
+        product.setId(id);
+        product.setUserWhoCreate(productFromBd.getUserWhoCreate());
+        product.setCreateTime(productFromBd.getCreateTime());
+        product.setUpdateTime(LocalDateTime.now());
+        this.iProductDao.save(product);
     }
 
     @Override

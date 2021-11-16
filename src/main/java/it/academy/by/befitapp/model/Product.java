@@ -40,7 +40,7 @@ public class Product implements Serializable {
     private LocalDateTime updateTime;
 
     @OneToOne
-    private User userWhoUpdate;
+    private User userWhoCreate;
 
     public Product(){
 
@@ -126,12 +126,11 @@ public class Product implements Serializable {
         this.updateTime = updateTime;
     }
 
-    public User getUserWhoUpdate() {
-        return userWhoUpdate;
+    public User getUserWhoCreate() {
+        return userWhoCreate;
     }
 
-    public void setUserWhoUpdate(User user) {
-        this.userWhoUpdate = user;
+    public void setUserWhoCreate(User userWhoCreate) {
+        this.userWhoCreate = userWhoCreate;
     }
-
 }

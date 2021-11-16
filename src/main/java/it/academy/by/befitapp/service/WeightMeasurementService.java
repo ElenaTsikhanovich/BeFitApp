@@ -53,7 +53,7 @@ public class WeightMeasurementService implements IWeightMeasurementService {
         return allByProfileId;
     }
 
-    @Override//должно при сейве отправлять данные в профайл
+    @Override
     public Long save(WeightMeasurement weightMeasurement, Long id) {
         LocalDateTime createTime = LocalDateTime.now();
         weightMeasurement.setCreateTime(createTime);
@@ -69,12 +69,14 @@ public class WeightMeasurementService implements IWeightMeasurementService {
     }
 
     @Override //переписать
-    public void update(WeightMeasurement weightMeasurement, Long id) {
-        WeightMeasurement weightMeasurementForUpdate = this.iWeightMeasurementDao.findById(id).get();
-        weightMeasurementForUpdate.setWeight(weightMeasurement.getWeight());
-        LocalDateTime updateTime = LocalDateTime.now();
-        weightMeasurementForUpdate.setUpdateTime(updateTime);
-        this.iWeightMeasurementDao.save(weightMeasurementForUpdate);
+    public void update(WeightMeasurement weightMeasurement, Long idProfile, Long idWeight) {
+        WeightMeasurement weightMeasurementFromBd = get(idProfile,idWeight);
+        weightMeasurement.setId(idWeight);
+        weightMeasurement.setCreateTime(weightMeasurementFromBd.getCreateTime());
+        weightMeasurement.setUpdateTime(LocalDateTime.now());
+        Profile profile = this.iProfileService.get(idProfile);
+        weightMeasurement.setProfile(profile);
+        this.iWeightMeasurementDao.save(weightMeasurement);
     }
 
     @Override

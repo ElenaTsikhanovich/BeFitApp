@@ -8,6 +8,6 @@ public interface IExercisesService {
     Exercise get(Long idProfile, Long id);
     Page<Exercise> getAll(Long id, ExercisesAndWeightSearchDto exercisesAndWeightSearchDto);
     Long save(Exercise exercise, Long id);
-    void update(Exercise exercise, Long id);
+    void update(Exercise exercise, Long idProfile, Long idActive);
     void delete(Long id);
 }

@@ -59,17 +59,12 @@ public class ProfileService implements IProfileService {
 
     @Override
     public void update(Profile profile, Long id) {
-        Profile profileForUpdate = get(id);
-        profileForUpdate.setHeight(profile.getHeight());
-        profileForUpdate.setDateOfBirth(profile.getDateOfBirth());
-        profileForUpdate.setGender(profile.getGender());
-        profileForUpdate.setLifeStyle(profile.getLifeStyle());
-        profileForUpdate.setWeightTarget(profile.getWeightTarget());
-        profileForUpdate.setWeightGoal(profile.getWeightGoal());
-        profileForUpdate.setWeightActual(profile.getWeightActual());
-        LocalDateTime updateTime = LocalDateTime.now();
-        profileForUpdate.setUpdateTime(updateTime);
-        this.iProfileDao.save(profileForUpdate);
+        Profile profileFromBd = get(id);
+        profile.setId(id);
+        profile.setCreateTime(profileFromBd.getCreateTime());
+        profile.setUpdateTime(LocalDateTime.now());
+        profile.setUser(profileFromBd.getUser());
+        this.iProfileDao.save(profile);
     }
 
     @Override

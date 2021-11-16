@@ -1,7 +1,7 @@
 package it.academy.by.befitapp.service.audit;
 
 import it.academy.by.befitapp.model.Audit;
-import it.academy.by.befitapp.model.Profile;
+import it.academy.by.befitapp.model.Journal;
 import it.academy.by.befitapp.model.User;
 import it.academy.by.befitapp.model.api.EntityType;
 import it.academy.by.befitapp.security.UserHolder;
@@ -16,78 +16,73 @@ import java.time.LocalDateTime;
 
 @Aspect
 @Service
-public class ProfileAuditService {
+public class JournalAuditService {
     private final IAuditService iAuditService;
     private final UserHolder userHolder;
     private final IUserService iUserService;
 
-    public ProfileAuditService(IAuditService iAuditService, UserHolder userHolder, IUserService iUserService) {
+    public JournalAuditService(IAuditService iAuditService, UserHolder userHolder, IUserService iUserService) {
         this.iAuditService = iAuditService;
         this.userHolder = userHolder;
         this.iUserService = iUserService;
     }
 
-    @After("execution(* it.academy.by.befitapp.service.ProfileService.save(..))")
-    public void saveProfile(JoinPoint joinPoint){
+    @After("execution(* it.academy.by.befitapp.service.JournalService.save(..))")
+    public void saveJournal(JoinPoint joinPoint){
         try {
             Object[] args = joinPoint.getArgs();
-            Profile profile = (Profile) args[0];
+            Journal journal =(Journal) args[0];
             Audit audit = new Audit();
-            audit.setCreateTime(profile.getUpdateTime());
+            audit.setCreateTime(journal.getUpdateTime());
             String userLogin = this.userHolder.getAuthentication().getName();
             User user = this.iUserService.getByLogin(userLogin);
             audit.setUser(user);
-            audit.setEntityType(EntityType.PROFILE);
-            audit.setEntityId(profile.getId());
-            audit.setText("Пользователь "+profile.getUser().getName()+" создал свой профиль с id "+profile.getId());
+            audit.setEntityType(EntityType.DAIRY);
+            audit.setEntityId(journal.getId());
+            audit.setText("Пользователь "+user.getName()+
+                    " добавил запись "+journal.getEatingTime()+" в дневник питания ");
             this.iAuditService.save(audit);
         }catch (Throwable e){
             throw new IllegalArgumentException("Ошибка работы аудита");
         }
     }
 
-    @After("execution(* it.academy.by.befitapp.service.ProfileService.update(..))")
-    public void updateProfile(JoinPoint joinPoint){
+    @After("execution(* it.academy.by.befitapp.service.JournalService.update(..))")
+    public void updateJournal(JoinPoint joinPoint){
         try {
             Object[] args = joinPoint.getArgs();
-            Profile profile = (Profile) args[0];
+            Journal journal =(Journal) args[0];
             Audit audit = new Audit();
-            audit.setCreateTime(profile.getUpdateTime());
+            audit.setCreateTime(journal.getUpdateTime());
             String userLogin = this.userHolder.getAuthentication().getName();
             User user = this.iUserService.getByLogin(userLogin);
             audit.setUser(user);
-            audit.setEntityType(EntityType.PROFILE);
-            audit.setEntityId(profile.getId());
-            audit.setText("Пользователь "+user.getName()+" обновил свой профиль "+profile.getId());
+            audit.setEntityType(EntityType.DAIRY);
+            audit.setEntityId(journal.getId());
+            audit.setText("Пользователь "+user.getName()+
+                    " изменил запись "+journal.getEatingTime()+" в дневник питания");
             this.iAuditService.save(audit);
         }catch (Throwable e){
             throw new IllegalArgumentException("Ошибка работы аудита");
         }
     }
 
-    @After("execution(* it.academy.by.befitapp.service.ProfileService.delete(..))")
-    public void deleteProfile(JoinPoint joinPoint){
+    @After("execution(* it.academy.by.befitapp.service.JournalService.delete(..))")
+    public void deleteJournal(JoinPoint joinPoint) {
         try {
             Object[] args = joinPoint.getArgs();
-            Long profileId = (Long) args[0];
+            Long journalId = (Long) args[0];
             Audit audit = new Audit();
             audit.setCreateTime(LocalDateTime.now());
             String userLogin = this.userHolder.getAuthentication().getName();
             User user = this.iUserService.getByLogin(userLogin);
             audit.setUser(user);
-            audit.setEntityType(EntityType.PROFILE);
-            audit.setEntityId(profileId);
-            audit.setText("Пользователь "+user.getName()+" удалил свой профиль");
+            audit.setEntityType(EntityType.DAIRY);
+            audit.setEntityId(journalId);
+            audit.setText("Пользователь " + user.getName() + " удалил запись "+journalId+" из дневника питания");
             this.iAuditService.save(audit);
-        }catch (Throwable e){
+        } catch (Throwable e) {
             throw new IllegalArgumentException("Ошибка работы аудита");
         }
     }
-
-    
-
-
-
-
-
 }

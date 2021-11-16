@@ -56,11 +56,11 @@ public class ExercisesController {
 
     //переписать апдейт и делит
     @RequestMapping(method = RequestMethod.PUT, value = "/{id_active}/dt_update/{dt_update}")
-    public ResponseEntity<?> update(@PathVariable("id_profile")Long id,
+    public ResponseEntity<?> update(@PathVariable("id_profile")Long idProfile,
                                     @PathVariable("id_active")Long idActive,
                                     @PathVariable("dt_update")Long dtUpdate,
                                     @RequestBody Exercise exercise){
-        this.iExercisesService.update(exercise,id);
+        this.iExercisesService.update(exercise,idProfile,idActive);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
