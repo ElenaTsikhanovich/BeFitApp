@@ -11,6 +11,7 @@ import it.academy.by.befitapp.service.validator.DataValidator;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -18,9 +19,11 @@ import java.time.LocalDateTime;
 @Service
 public class UserService implements IUserService {
     private final IUserDao iUserDao;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(IUserDao iUserDao) {
+    public UserService(IUserDao iUserDao, PasswordEncoder passwordEncoder) {
         this.iUserDao = iUserDao;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -41,8 +44,10 @@ public class UserService implements IUserService {
         LocalDateTime createTime = LocalDateTime.now();
         user.setCreateTime(createTime);
         user.setUpdateTime(createTime);
-        user.setRole(Role.USER);
+        user.setRole(Role.ROLE_USER);
         user.setUserStatus(UserStatus.NO_ACTIVE);
+        String encode = this.passwordEncoder.encode(user.getPassword());
+        user.setPassword(encode);
         User saveUser = this.iUserDao.save(user); // при регистрации отправляется письмо на почту
         Long id = saveUser.getId();
         return id;
@@ -56,19 +61,9 @@ public class UserService implements IUserService {
         user.setCreateTime(userFromBd.getCreateTime());
         user.setUpdateTime(LocalDateTime.now());
         user.setRole(userFromBd.getRole());
+        String encode = this.passwordEncoder.encode(user.getPassword());
+        user.setPassword(encode);
         this.iUserDao.save(user);
     }
 
-
-    @Override
-    public User getByLoginAndPassword(LoginDto loginDto) {
-            User byLoginAndPassword = this.iUserDao.findByLoginAndPassword(loginDto.getLogin(), loginDto.getPassword());
-            return byLoginAndPassword;
-    }
-
-    @Override
-    public User getByLogin(String login) {
-        User byLogin = this.iUserDao.findByLogin(login);
-        return byLogin;
-    }
 }

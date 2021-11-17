@@ -21,6 +21,7 @@ public class Ingredient implements Serializable {
     @Column(name = "createTime")
     private LocalDateTime createTime;
 
+    @Version
     @Column(name = "updateTime")
     private LocalDateTime updateTime;
 

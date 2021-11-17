@@ -7,6 +7,7 @@ import it.academy.by.befitapp.model.WeightMeasurement;
 import it.academy.by.befitapp.model.api.EntityType;
 import it.academy.by.befitapp.security.UserHolder;
 import it.academy.by.befitapp.service.api.IAuditService;
+import it.academy.by.befitapp.service.api.IAuthService;
 import it.academy.by.befitapp.service.api.IUserService;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.After;
@@ -20,12 +21,12 @@ import java.time.LocalDateTime;
 public class WeightMeasurementAuditService {
     private final IAuditService iAuditService;
     private final UserHolder userHolder;
-    private final IUserService iUserService;
+    private final IAuthService iAuthService;
 
-    public WeightMeasurementAuditService(IAuditService iAuditService, UserHolder userHolder, IUserService iUserService) {
+    public WeightMeasurementAuditService(IAuditService iAuditService, UserHolder userHolder, IAuthService iAuthService) {
         this.iAuditService = iAuditService;
         this.userHolder = userHolder;
-        this.iUserService = iUserService;
+        this.iAuthService = iAuthService;
     }
 
     @After("execution(* it.academy.by.befitapp.service.WeightMeasurementService.save(..))")
@@ -36,7 +37,7 @@ public class WeightMeasurementAuditService {
             Audit audit = new Audit();
             audit.setCreateTime(weightMeasurement.getUpdateTime());
             String loginUser = this.userHolder.getAuthentication().getName();
-            User user = this.iUserService.getByLogin(loginUser);
+            User user = this.iAuthService.getByLogin(loginUser);
             audit.setUser(user);
             audit.setEntityType(EntityType.WEIGHT_MEASUREMENT);
             audit.setEntityId(weightMeasurement.getId());
@@ -56,7 +57,7 @@ public class WeightMeasurementAuditService {
             Audit audit = new Audit();
             audit.setCreateTime(weightMeasurement.getUpdateTime());
             String loginUser = this.userHolder.getAuthentication().getName();
-            User user = this.iUserService.getByLogin(loginUser);
+            User user = this.iAuthService.getByLogin(loginUser);
             audit.setUser(user);
             audit.setEntityType(EntityType.WEIGHT_MEASUREMENT);
             audit.setEntityId(weightMeasurement.getId());
@@ -76,7 +77,7 @@ public class WeightMeasurementAuditService {
             Audit audit = new Audit();
             audit.setCreateTime(LocalDateTime.now());
             String userLogin = this.userHolder.getAuthentication().getName();
-            User user = this.iUserService.getByLogin(userLogin);
+            User user = this.iAuthService.getByLogin(userLogin);
             audit.setUser(user);
             audit.setEntityType(EntityType.WEIGHT_MEASUREMENT);
             audit.setEntityId(idWeightMeasurement);

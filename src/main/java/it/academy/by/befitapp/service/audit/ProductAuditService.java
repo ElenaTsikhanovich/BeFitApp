@@ -7,6 +7,7 @@ import it.academy.by.befitapp.model.User;
 import it.academy.by.befitapp.model.api.EntityType;
 import it.academy.by.befitapp.security.UserHolder;
 import it.academy.by.befitapp.service.api.IAuditService;
+import it.academy.by.befitapp.service.api.IAuthService;
 import it.academy.by.befitapp.service.api.IProductService;
 import it.academy.by.befitapp.service.api.IUserService;
 import org.aspectj.lang.JoinPoint;
@@ -21,15 +22,12 @@ import java.time.LocalDateTime;
 public class ProductAuditService {
     private final IAuditService iAuditService;
     private final UserHolder userHolder;
-    private final IUserService iUserService;
-    private final IProductService iProductService;
+    private final IAuthService iAuthService;
 
-
-    public ProductAuditService(IAuditService iAuditService, UserHolder userHolder, IUserService iUserService, IProductService iProductService) {
+    public ProductAuditService(IAuditService iAuditService, UserHolder userHolder, IAuthService iAuthService) {
         this.iAuditService = iAuditService;
         this.userHolder = userHolder;
-        this.iUserService = iUserService;
-        this.iProductService = iProductService;
+        this.iAuthService = iAuthService;
     }
 
     @After("execution(* it.academy.by.befitapp.service.ProductService.save(..))")
@@ -58,7 +56,7 @@ public class ProductAuditService {
             Audit audit = new Audit();
             audit.setCreateTime(product.getUpdateTime());
             String userLogin = this.userHolder.getAuthentication().getName();
-            User user = this.iUserService.getByLogin(userLogin);
+            User user = this.iAuthService.getByLogin(userLogin);
             audit.setUser(user);
             audit.setEntityType(EntityType.PRODUCT);
             audit.setEntityId(product.getId());
@@ -78,7 +76,7 @@ public class ProductAuditService {
             Audit audit = new Audit();
             audit.setCreateTime(LocalDateTime.now());
             String userLogin = this.userHolder.getAuthentication().getName();
-            User user = this.iUserService.getByLogin(userLogin);
+            User user = this.iAuthService.getByLogin(userLogin);
             audit.setUser(user);
             audit.setEntityType(EntityType.PRODUCT);
             audit.setEntityId(productId);

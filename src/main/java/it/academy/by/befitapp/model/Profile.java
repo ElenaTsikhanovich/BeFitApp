@@ -26,7 +26,7 @@ public class Profile implements Serializable {
     private Double height;
 
     @Column(name = "weightActual")
-    private Double weightActual; //заполняется из дневника замеров
+    private Double weightActual;
 
     @Column(name = "weightTarget")
     private Double weightTarget;
@@ -47,6 +47,7 @@ public class Profile implements Serializable {
     @Column(name = "createTime")
     private LocalDateTime createTime;
 
+    @Version
     @Column(name = "updateTime")
     private LocalDateTime updateTime;
 

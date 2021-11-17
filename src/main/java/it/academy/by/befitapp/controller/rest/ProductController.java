@@ -1,4 +1,4 @@
-package it.academy.by.befitapp.controller;
+package it.academy.by.befitapp.controller.rest;
 
 import it.academy.by.befitapp.dto.NutrientDto;
 import it.academy.by.befitapp.dto.ProductSearchDto;

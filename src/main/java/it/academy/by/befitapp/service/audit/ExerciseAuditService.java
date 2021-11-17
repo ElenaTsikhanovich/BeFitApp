@@ -6,6 +6,7 @@ import it.academy.by.befitapp.model.User;
 import it.academy.by.befitapp.model.api.EntityType;
 import it.academy.by.befitapp.security.UserHolder;
 import it.academy.by.befitapp.service.api.IAuditService;
+import it.academy.by.befitapp.service.api.IAuthService;
 import it.academy.by.befitapp.service.api.IUserService;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.After;
@@ -19,12 +20,12 @@ import java.time.LocalDateTime;
 public class ExerciseAuditService {
     private final IAuditService iAuditService;
     private final UserHolder userHolder;
-    private final IUserService iUserService;
+    private final IAuthService iAuthService;
 
-    public ExerciseAuditService(IAuditService iAuditService, UserHolder userHolder, IUserService iUserService) {
+    public ExerciseAuditService(IAuditService iAuditService, UserHolder userHolder, IAuthService iAuthService) {
         this.iAuditService = iAuditService;
         this.userHolder = userHolder;
-        this.iUserService = iUserService;
+        this.iAuthService = iAuthService;
     }
 
     @After("execution(* it.academy.by.befitapp.service.ExerciseService.save(..))")
@@ -35,7 +36,7 @@ public class ExerciseAuditService {
             Audit audit = new Audit();
             audit.setCreateTime(exercise.getUpdateTime());
             String userLogin = this.userHolder.getAuthentication().getName();
-            User user = this.iUserService.getByLogin(userLogin);
+            User user = this.iAuthService.getByLogin(userLogin);
             audit.setUser(user);
             audit.setEntityType(EntityType.EXERCISES);
             audit.setEntityId(exercise.getId());
@@ -55,7 +56,7 @@ public class ExerciseAuditService {
             Audit audit = new Audit();
             audit.setCreateTime(exercise.getUpdateTime());
             String userLogin = this.userHolder.getAuthentication().getName();
-            User user = this.iUserService.getByLogin(userLogin);
+            User user = this.iAuthService.getByLogin(userLogin);
             audit.setUser(user);
             audit.setEntityType(EntityType.EXERCISES);
             audit.setEntityId(exercise.getId());
@@ -75,7 +76,7 @@ public class ExerciseAuditService {
             Audit audit = new Audit();
             audit.setCreateTime(LocalDateTime.now());
             String userLogin = this.userHolder.getAuthentication().getName();
-            User user = this.iUserService.getByLogin(userLogin);
+            User user = this.iAuthService.getByLogin(userLogin);
             audit.setUser(user);
             audit.setEntityType(EntityType.EXERCISES);
             audit.setEntityId(exerciseId);

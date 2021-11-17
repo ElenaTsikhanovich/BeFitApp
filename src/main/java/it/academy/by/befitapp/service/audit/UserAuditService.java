@@ -5,6 +5,7 @@ import it.academy.by.befitapp.model.User;
 import it.academy.by.befitapp.model.api.EntityType;
 import it.academy.by.befitapp.security.UserHolder;
 import it.academy.by.befitapp.service.api.IAuditService;
+import it.academy.by.befitapp.service.api.IAuthService;
 import it.academy.by.befitapp.service.api.IUserService;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.After;
@@ -19,12 +20,12 @@ import java.time.LocalDateTime;
 public class UserAuditService {
     private final IAuditService iAuditService;
     private final UserHolder userHolder;
-    private final IUserService iUserService;
+    private final IAuthService iAuthService;
 
-    public UserAuditService(IAuditService iAuditService, UserHolder userHolder, IUserService iUserService) {
+    public UserAuditService(IAuditService iAuditService, UserHolder userHolder, IAuthService iAuthService) {
         this.iAuditService = iAuditService;
         this.userHolder = userHolder;
-        this.iUserService = iUserService;
+        this.iAuthService = iAuthService;
     }
 
     @After("execution(* it.academy.by.befitapp.service.UserService.save(..))")
@@ -52,7 +53,7 @@ public class UserAuditService {
             audit.setCreateTime(user.getUpdateTime());
             audit.setText("Пользователь "+user.getName()+" обновил данные!");
             String userLogin = this.userHolder.getAuthentication().getName();
-            User userByLogin = this.iUserService.getByLogin(userLogin);
+            User userByLogin = this.iAuthService.getByLogin(userLogin);
             audit.setUser(userByLogin);
             audit.setEntityType(EntityType.USER);
             audit.setEntityId(user.getId());

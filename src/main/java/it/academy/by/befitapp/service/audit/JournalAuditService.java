@@ -6,6 +6,7 @@ import it.academy.by.befitapp.model.User;
 import it.academy.by.befitapp.model.api.EntityType;
 import it.academy.by.befitapp.security.UserHolder;
 import it.academy.by.befitapp.service.api.IAuditService;
+import it.academy.by.befitapp.service.api.IAuthService;
 import it.academy.by.befitapp.service.api.IUserService;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.After;
@@ -19,12 +20,12 @@ import java.time.LocalDateTime;
 public class JournalAuditService {
     private final IAuditService iAuditService;
     private final UserHolder userHolder;
-    private final IUserService iUserService;
+    private final IAuthService iAuthService;
 
-    public JournalAuditService(IAuditService iAuditService, UserHolder userHolder, IUserService iUserService) {
+    public JournalAuditService(IAuditService iAuditService, UserHolder userHolder, IAuthService iAuthService) {
         this.iAuditService = iAuditService;
         this.userHolder = userHolder;
-        this.iUserService = iUserService;
+        this.iAuthService = iAuthService;
     }
 
     @After("execution(* it.academy.by.befitapp.service.JournalService.save(..))")
@@ -35,7 +36,7 @@ public class JournalAuditService {
             Audit audit = new Audit();
             audit.setCreateTime(journal.getUpdateTime());
             String userLogin = this.userHolder.getAuthentication().getName();
-            User user = this.iUserService.getByLogin(userLogin);
+            User user = this.iAuthService.getByLogin(userLogin);
             audit.setUser(user);
             audit.setEntityType(EntityType.DAIRY);
             audit.setEntityId(journal.getId());
@@ -55,7 +56,7 @@ public class JournalAuditService {
             Audit audit = new Audit();
             audit.setCreateTime(journal.getUpdateTime());
             String userLogin = this.userHolder.getAuthentication().getName();
-            User user = this.iUserService.getByLogin(userLogin);
+            User user = this.iAuthService.getByLogin(userLogin);
             audit.setUser(user);
             audit.setEntityType(EntityType.DAIRY);
             audit.setEntityId(journal.getId());
@@ -75,7 +76,7 @@ public class JournalAuditService {
             Audit audit = new Audit();
             audit.setCreateTime(LocalDateTime.now());
             String userLogin = this.userHolder.getAuthentication().getName();
-            User user = this.iUserService.getByLogin(userLogin);
+            User user = this.iAuthService.getByLogin(userLogin);
             audit.setUser(user);
             audit.setEntityType(EntityType.DAIRY);
             audit.setEntityId(journalId);

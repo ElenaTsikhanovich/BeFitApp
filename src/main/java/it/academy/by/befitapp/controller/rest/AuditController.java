@@ -1,4 +1,4 @@
-package it.academy.by.befitapp.controller;
+package it.academy.by.befitapp.controller.rest;
 
 import it.academy.by.befitapp.model.Audit;
 import it.academy.by.befitapp.service.api.IAuditService;
