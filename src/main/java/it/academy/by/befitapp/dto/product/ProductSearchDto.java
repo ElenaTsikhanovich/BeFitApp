@@ -1,6 +1,8 @@
-package it.academy.by.befitapp.dto;
+package it.academy.by.befitapp.dto.product;
 
-public class ProductSearchDto extends ListDto{
+import it.academy.by.befitapp.dto.ListDto;
+
+public class ProductSearchDto extends ListDto {
     private String brand;
     private Double caloriesBefore;
     private Double caloriesAfter;

@@ -8,6 +8,5 @@ public interface IDishService {
     Dish get(Long id);
     Page<Dish> getAll(ListDto listDto);
     Long save(Dish dish);
-    void update(Dish dish, Long id);
-    public void delete(Long id);
+    void delete(Long id,Long dtUpdate);
 }

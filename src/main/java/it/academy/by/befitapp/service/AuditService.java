@@ -24,10 +24,9 @@ public class AuditService implements IAuditService {
     }
 
     @Override
-    public Audit get(Long id) {
-        Audit audit = this.iAuditDao.findById(id).orElseThrow(
-                () -> new IllegalArgumentException("Данных в базе нет"));
-        return audit;
+    public List<Audit> get(Long id) {
+        List<Audit> allByUserId = this.iAuditDao.findAllByUserId(id);
+        return allByUserId;
     }
 
     @Override

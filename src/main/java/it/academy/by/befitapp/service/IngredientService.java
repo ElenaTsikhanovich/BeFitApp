@@ -23,4 +23,3 @@ public class IngredientService implements IIngredientService {
         return saveIngredient.getId();
     }
 }
-//TODO обработать ошибки

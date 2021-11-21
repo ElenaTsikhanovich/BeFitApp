@@ -13,7 +13,7 @@ public class DataValidator {
     }
 
     public boolean isPasswordValid(String password){
-        if(password.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$")){
+        if(password.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=_])(?=\\S+$).{8,}$")){
             return true;
         }
         return false;

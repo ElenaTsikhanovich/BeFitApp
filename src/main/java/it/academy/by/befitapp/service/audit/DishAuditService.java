@@ -7,9 +7,11 @@ import it.academy.by.befitapp.model.api.EntityType;
 import it.academy.by.befitapp.security.UserHolder;
 import it.academy.by.befitapp.service.api.IAuditService;
 import it.academy.by.befitapp.service.api.IAuthService;
+import it.academy.by.befitapp.service.api.IDishService;
 import it.academy.by.befitapp.service.api.IUserService;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.After;
+import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Service;
 
@@ -21,23 +23,27 @@ public class DishAuditService {
     private final IAuditService iAuditService;
     private final UserHolder userHolder;
     private final IAuthService iAuthService;
+    private final IDishService iDishService;
 
-    public DishAuditService(IAuditService iAuditService, UserHolder userHolder, IAuthService iAuthService) {
+    public DishAuditService(IAuditService iAuditService, UserHolder userHolder, IAuthService iAuthService,
+                            IDishService iDishService) {
         this.iAuditService = iAuditService;
         this.userHolder = userHolder;
         this.iAuthService = iAuthService;
+        this.iDishService = iDishService;
     }
 
-    @After("execution(* it.academy.by.befitapp.service.DishService.save(..))")
-    public void saveDish(JoinPoint joinPoint){
+    @AfterReturning(value = "execution(* it.academy.by.befitapp.service.DishService.save(..))",returning = "result")
+    public void saveDish(JoinPoint joinPoint,Object result){
         try {
             Object[] args = joinPoint.getArgs();
             Dish dish = (Dish) args[0];
+            Long idDish = (Long) result;
             Audit audit = new Audit();
             audit.setCreateTime(dish.getUpdateTime());
             audit.setUser(dish.getUserWhoCreate());
             audit.setEntityType(EntityType.DISH);
-            audit.setEntityId(dish.getId());
+            audit.setEntityId(idDish);
             audit.setText("Пользователь "+dish.getUserWhoCreate().getName()+
                     " добавил блюдо "+dish.getName()+" в каталог блюд");
             this.iAuditService.save(audit);
@@ -46,27 +52,7 @@ public class DishAuditService {
         }
     }
 
-    @After("execution(* it.academy.by.befitapp.service.DishService.update(..))")
-    public void updateDish(JoinPoint joinPoint){
-        try {
-            Object[] args = joinPoint.getArgs();
-            Dish dish = (Dish) args[0];
-            Audit audit = new Audit();
-            audit.setCreateTime(dish.getUpdateTime());
-            String userLogin = this.userHolder.getAuthentication().getName();
-            User user = this.iAuthService.getByLogin(userLogin);
-            audit.setUser(user);
-            audit.setEntityType(EntityType.DISH);
-            audit.setEntityId(dish.getId());
-            audit.setText("Пользователь "+user.getName()+
-                    " внес измнения в блюдо "+dish.getName());
-            this.iAuditService.save(audit);
-        }catch (Throwable e){
-            throw new IllegalArgumentException("Ошибка работы аудита");
-        }
-    }
-
-    @After("execution(* it.academy.by.befitapp.service.DishService.delete(..))")
+    @AfterReturning("execution(* it.academy.by.befitapp.service.DishService.delete(..))")
     public void deleteDish(JoinPoint joinPoint) {
         try {
             Object[] args = joinPoint.getArgs();

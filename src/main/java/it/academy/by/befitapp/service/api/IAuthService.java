@@ -1,6 +1,6 @@
 package it.academy.by.befitapp.service.api;
 
-import it.academy.by.befitapp.dto.LoginDto;
+import it.academy.by.befitapp.dto.user.LoginDto;
 import it.academy.by.befitapp.model.User;
 
 public interface IAuthService {

@@ -1,9 +1,11 @@
 package it.academy.by.befitapp.controller.rest;
 
 import it.academy.by.befitapp.dto.NutrientDto;
-import it.academy.by.befitapp.dto.ProductSearchDto;
+import it.academy.by.befitapp.dto.product.ProductSearchDto;
+import it.academy.by.befitapp.dto.product.ProductUpdateDto;
 import it.academy.by.befitapp.model.Product;
-import it.academy.by.befitapp.utils.ICalculator;
+import it.academy.by.befitapp.utils.ConvertTime;
+import it.academy.by.befitapp.service.colculator.ICalculator;
 import it.academy.by.befitapp.service.api.IProductService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -29,9 +31,13 @@ public class ProductController {
         Product product = this.iProductService.get(id);
         if(weight!=null){
             NutrientDto nutrientDto = this.iCalculator.nutrientsInProduct(product,weight);
+            nutrientDto.setProduct(product);
             return new ResponseEntity<>(nutrientDto, HttpStatus.OK);
         }
-        return new ResponseEntity<>(product, HttpStatus.OK);
+        ProductUpdateDto productUpdateDto = new ProductUpdateDto();
+        productUpdateDto.setProduct(product);
+        productUpdateDto.setUpdateTime(ConvertTime.fromDateToMilli(product.getUpdateTime()));
+        return new ResponseEntity<>(productUpdateDto, HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.GET)
@@ -59,19 +65,18 @@ public class ProductController {
         return new ResponseEntity<>(productId,HttpStatus.CREATED);
     }
 
-    //разобраться с милисекундами
     @RequestMapping(method = RequestMethod.PUT, value = "/{id}/dt_update/{dt_update}")
     public ResponseEntity<?> update(@PathVariable("id")Long id,
                                     @PathVariable("dt_update") Long dtUpdate,
                                     @RequestBody Product product){
-        this.iProductService.update(product, id);
+        this.iProductService.update(product, id,dtUpdate);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.DELETE, value = "/{id}/dt_update/{dt_update}")
     public ResponseEntity<?> delete(@PathVariable("id")Long id,
                                     @PathVariable("dt_update") Long dtUpdate){
-        this.iProductService.delete(id);
+        this.iProductService.delete(id,dtUpdate);
         return new ResponseEntity<>(HttpStatus.OK);
 
     }

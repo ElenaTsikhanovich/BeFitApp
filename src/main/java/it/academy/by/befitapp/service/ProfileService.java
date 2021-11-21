@@ -2,38 +2,38 @@ package it.academy.by.befitapp.service;
 
 import it.academy.by.befitapp.dao.api.IProfileDao;
 import it.academy.by.befitapp.dto.ListDto;
-import it.academy.by.befitapp.dto.LoginDto;
+import it.academy.by.befitapp.exception.ElementNotFoundException;
+import it.academy.by.befitapp.exception.NoRightsForChangeException;
 import it.academy.by.befitapp.model.Profile;
 import it.academy.by.befitapp.model.User;
-import it.academy.by.befitapp.model.api.EAuditAction;
-import it.academy.by.befitapp.model.api.EntityType;
+import it.academy.by.befitapp.model.api.Role;
 import it.academy.by.befitapp.security.UserHolder;
-import it.academy.by.befitapp.service.api.IAuditService;
+import it.academy.by.befitapp.service.api.IAuthService;
 import it.academy.by.befitapp.service.api.IProfileService;
-import it.academy.by.befitapp.service.api.IUserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Service
 public class ProfileService implements IProfileService {
     private final IProfileDao iProfileDao;
     private final UserHolder userHolder;
-    private final IUserService iUserService;
+    private final IAuthService iAuthService;
 
-    public ProfileService(IProfileDao iProfileDao, UserHolder userHolder, IUserService iUserService) {
+    public ProfileService(IProfileDao iProfileDao, UserHolder userHolder, IAuthService iAuthService) {
         this.iProfileDao = iProfileDao;
         this.userHolder = userHolder;
-        this.iUserService = iUserService;
+        this.iAuthService = iAuthService;
     }
 
     @Override
     public Profile get(Long id) {
         Profile profile = this.iProfileDao.findById(id).orElseThrow(
-                () -> new IllegalArgumentException("Нет данных с таким id"));
+                ElementNotFoundException::new);
         return profile;
     }
 
@@ -47,7 +47,7 @@ public class ProfileService implements IProfileService {
     @Override
     public Long save(Profile profile) {
         String userLogin = this.userHolder.getAuthentication().getName();
-        User userByLogin = this.iUserService.getByLogin(userLogin); //как варриант из холдера возвращать сразу юзера целого
+        User userByLogin = this.iAuthService.getByLogin(userLogin);
         profile.setUser(userByLogin);
         LocalDateTime createTime = LocalDateTime.now();
         profile.setCreateTime(createTime);
@@ -59,16 +59,37 @@ public class ProfileService implements IProfileService {
 
     @Override
     public void update(Profile profile, Long id) {
-        Profile profileFromBd = get(id);
-        profile.setId(id);
-        profile.setCreateTime(profileFromBd.getCreateTime());
-        profile.setUpdateTime(LocalDateTime.now());
-        profile.setUser(profileFromBd.getUser());
-        this.iProfileDao.save(profile);
+        if (checkCurrentUser(id)) {
+            Profile profileFromBd = get(id);
+            profileFromBd.setHeight(profile.getHeight());
+            profileFromBd.setDateOfBirth(profile.getDateOfBirth());
+            profileFromBd.setGender(profile.getGender());
+            profileFromBd.setLifeStyle(profile.getLifeStyle());
+            profileFromBd.setWeightGoal(profile.getWeightGoal());
+            profileFromBd.setWeightTarget(profile.getWeightTarget());
+            this.iProfileDao.save(profileFromBd);
+        }else {
+            throw new NoRightsForChangeException();
+        }
     }
 
     @Override
     public void delete(Long id) {
-        this.iProfileDao.deleteById(id);
+        if (checkCurrentUser(id)) {
+            this.iProfileDao.deleteById(id);
+        }else {
+            throw new NoRightsForChangeException();
+        }
     }
+
+    @Override
+    public boolean checkCurrentUser(Long idProfile) {
+        String userLogin = this.userHolder.getAuthentication().getName();
+        User currentUser = this.iAuthService.getByLogin(userLogin);
+        Profile profile = get(idProfile);
+        User profileUser = profile.getUser();
+        return (Objects.equals(currentUser.getId(), profileUser.getId())
+                || currentUser.getRole().equals(Role.ROLE_ADMIN));
+    }
+
 }

@@ -10,8 +10,8 @@ import java.util.List;
 
 public interface IWeightMeasurementDao extends JpaRepository<WeightMeasurement, Long> {
     Page<WeightMeasurement> findAllByProfileId(Long id, Pageable pageable);
-    Page<WeightMeasurement> findWeightMeasurementByUpdateTimeBetween(LocalDateTime after, LocalDateTime before, Pageable pageable);
-    Page<WeightMeasurement> findWeightMeasurementByUpdateTimeAfter(LocalDateTime after,Pageable pageable);
-    Page<WeightMeasurement> findWeightMeasurementByUpdateTimeBefore(LocalDateTime before,Pageable pageable);
+    Page<WeightMeasurement> findWeightMeasurementByProfileIdAndUpdateTimeBetween(Long idProfile, LocalDateTime after, LocalDateTime before, Pageable pageable);
+    Page<WeightMeasurement> findWeightMeasurementByProfileIdAndUpdateTimeAfter(Long idProfile, LocalDateTime after,Pageable pageable);
+    Page<WeightMeasurement> findWeightMeasurementByProfileIdAndUpdateTimeBefore(Long idProfile, LocalDateTime before,Pageable pageable);
     WeightMeasurement findWeightMeasurementByProfileIdAndId(Long profileId, Long id);
 }

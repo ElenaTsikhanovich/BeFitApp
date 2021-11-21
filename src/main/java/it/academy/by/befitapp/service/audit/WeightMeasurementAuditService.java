@@ -9,8 +9,10 @@ import it.academy.by.befitapp.security.UserHolder;
 import it.academy.by.befitapp.service.api.IAuditService;
 import it.academy.by.befitapp.service.api.IAuthService;
 import it.academy.by.befitapp.service.api.IUserService;
+import it.academy.by.befitapp.service.api.IWeightMeasurementService;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.After;
+import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Service;
 
@@ -22,54 +24,61 @@ public class WeightMeasurementAuditService {
     private final IAuditService iAuditService;
     private final UserHolder userHolder;
     private final IAuthService iAuthService;
+    private final IWeightMeasurementService iWeightMeasurementService;
 
-    public WeightMeasurementAuditService(IAuditService iAuditService, UserHolder userHolder, IAuthService iAuthService) {
+    public WeightMeasurementAuditService(IAuditService iAuditService, UserHolder userHolder, IAuthService iAuthService,
+                                         IWeightMeasurementService iWeightMeasurementService) {
         this.iAuditService = iAuditService;
         this.userHolder = userHolder;
         this.iAuthService = iAuthService;
+        this.iWeightMeasurementService = iWeightMeasurementService;
     }
 
-    @After("execution(* it.academy.by.befitapp.service.WeightMeasurementService.save(..))")
-    public void saveWeightMeasurement(JoinPoint joinPoint) {
+    @AfterReturning(value = "execution(* it.academy.by.befitapp.service.WeightMeasurementService.save(..))",returning = "result")
+    public void saveWeightMeasurement(JoinPoint joinPoint,Object result) {
         try {
             Object[] args = joinPoint.getArgs();
             WeightMeasurement weightMeasurement = (WeightMeasurement) args[0];
-            Audit audit = new Audit();
+            Long idWeightMeasurement = (Long) result;
+             Audit audit = new Audit();
             audit.setCreateTime(weightMeasurement.getUpdateTime());
             String loginUser = this.userHolder.getAuthentication().getName();
             User user = this.iAuthService.getByLogin(loginUser);
             audit.setUser(user);
             audit.setEntityType(EntityType.WEIGHT_MEASUREMENT);
-            audit.setEntityId(weightMeasurement.getId());
+            audit.setEntityId(idWeightMeasurement);
             audit.setText("Пользователь " + user.getName() +
-                    " добавил запись "+weightMeasurement.getId()+" в дневник взвешивания");
+                    " добавил запись "+idWeightMeasurement+" в дневник взвешивания");
             this.iAuditService.save(audit);
         } catch (Throwable e) {
             throw new IllegalArgumentException("Ошибка работы аудита");
         }
     }
 
-    @After("execution(* it.academy.by.befitapp.service.WeightMeasurementService.update(..))")
+    @AfterReturning("execution(* it.academy.by.befitapp.service.WeightMeasurementService.update(..))")
     public void updateWeightMeasurement(JoinPoint joinPoint) {
         try {
             Object[] args = joinPoint.getArgs();
             WeightMeasurement weightMeasurement = (WeightMeasurement) args[0];
+            Long idProfile = (Long) args[1];
+            Long idWeight = (Long) args[2];
             Audit audit = new Audit();
-            audit.setCreateTime(weightMeasurement.getUpdateTime());
+            LocalDateTime updateTime = this.iWeightMeasurementService.get(idProfile, idWeight).getUpdateTime();
+            audit.setCreateTime(updateTime);
             String loginUser = this.userHolder.getAuthentication().getName();
             User user = this.iAuthService.getByLogin(loginUser);
             audit.setUser(user);
             audit.setEntityType(EntityType.WEIGHT_MEASUREMENT);
-            audit.setEntityId(weightMeasurement.getId());
+            audit.setEntityId(idWeight);
             audit.setText("Пользователь " + user.getName() +
-                    " изменил запись "+weightMeasurement.getId()+" в дневнике взвешивания");
+                    " изменил запись "+idWeight+" в дневнике взвешивания");
             this.iAuditService.save(audit);
         } catch (Throwable e) {
             throw new IllegalArgumentException("Ошибка работы аудита");
         }
     }
 
-    @After("execution(* it.academy.by.befitapp.service.WeightMeasurementService.delete(..))")
+    @AfterReturning("execution(* it.academy.by.befitapp.service.WeightMeasurementService.delete(..))")
     public void deleteWeightMeasurement(JoinPoint joinPoint){
         try {
             Object[] args = joinPoint.getArgs();

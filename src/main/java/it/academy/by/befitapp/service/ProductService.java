@@ -1,42 +1,39 @@
 package it.academy.by.befitapp.service;
 
 import it.academy.by.befitapp.dao.api.IProductDao;
-import it.academy.by.befitapp.dto.ProductSearchDto;
+import it.academy.by.befitapp.dto.product.ProductSearchDto;
+import it.academy.by.befitapp.exception.ElementNotFoundException;
+import it.academy.by.befitapp.exception.UpdateDeleteException;
 import it.academy.by.befitapp.model.Product;
 import it.academy.by.befitapp.model.User;
-import it.academy.by.befitapp.model.api.EAuditAction;
-import it.academy.by.befitapp.model.api.EntityType;
 import it.academy.by.befitapp.security.UserHolder;
-import it.academy.by.befitapp.service.api.IAuditService;
+import it.academy.by.befitapp.service.api.IAuthService;
 import it.academy.by.befitapp.service.api.IProductService;
-import it.academy.by.befitapp.service.api.IUserService;
+import it.academy.by.befitapp.utils.ConvertTime;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.Lock;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.EntityManager;
-import javax.persistence.LockModeType;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Objects;
 
 @Service
 public class ProductService implements IProductService {
     private final IProductDao iProductDao;
     private final UserHolder userHolder;
-    private final IUserService iUserService;
+    private final IAuthService iAuthService;
 
-    public ProductService(IProductDao iProductDao, UserHolder userHolder, IUserService iUserService) {
+    public ProductService(IProductDao iProductDao, UserHolder userHolder, IAuthService iAuthService) {
         this.iProductDao = iProductDao;
         this.userHolder = userHolder;
-        this.iUserService = iUserService;
+        this.iAuthService = iAuthService;
     }
 
     @Override
     public Product get(Long id) {
         return this.iProductDao.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Данных с таким id нет"));
+                .orElseThrow(ElementNotFoundException::new);
     }
 
     @Override
@@ -45,23 +42,23 @@ public class ProductService implements IProductService {
 
         if (productSearchDto.getName() != null && productSearchDto.getBrand() != null) {
             return this.iProductDao.findProductByNameAndBrand(
-                    productSearchDto.getName(), productSearchDto.getBrand(),pageable);
+                    productSearchDto.getName(), productSearchDto.getBrand(), pageable);
         }
         if (productSearchDto.getName() != null) {
-            return this.iProductDao.findProductByName(productSearchDto.getName(),pageable);
+            return this.iProductDao.findProductByName(productSearchDto.getName(), pageable);
         }
         if (productSearchDto.getBrand() != null) {
-            return this.iProductDao.findProductByBrand(productSearchDto.getBrand(),pageable);
+            return this.iProductDao.findProductByBrand(productSearchDto.getBrand(), pageable);
         }
         if (productSearchDto.getCaloriesAfter() != null && productSearchDto.getCaloriesBefore() != null) {
             return this.iProductDao.findProductByCaloriesBetween(
-                    productSearchDto.getCaloriesAfter(), productSearchDto.getCaloriesBefore(),pageable);
+                    productSearchDto.getCaloriesAfter(), productSearchDto.getCaloriesBefore(), pageable);
         }
         if (productSearchDto.getCaloriesAfter() != null) {
-            return this.iProductDao.findProductByCaloriesAfter(productSearchDto.getCaloriesAfter(),pageable);
+            return this.iProductDao.findProductByCaloriesAfter(productSearchDto.getCaloriesAfter(), pageable);
         }
         if (productSearchDto.getCaloriesBefore() != null) {
-            return this.iProductDao.findProductByCaloriesBefore(productSearchDto.getCaloriesBefore(),pageable);
+            return this.iProductDao.findProductByCaloriesBefore(productSearchDto.getCaloriesBefore(), pageable);
         }
         return this.iProductDao.findAll(pageable);
 
@@ -70,7 +67,7 @@ public class ProductService implements IProductService {
     @Override
     public Long save(Product product) {
         String userLogin = this.userHolder.getAuthentication().getName();
-        User userByLogin = this.iUserService.getByLogin(userLogin);
+        User userByLogin = this.iAuthService.getByLogin(userLogin);
         product.setUserWhoCreate(userByLogin);
         LocalDateTime createTime = LocalDateTime.now();
         product.setCreateTime(createTime);
@@ -81,21 +78,31 @@ public class ProductService implements IProductService {
     }
 
     @Override
-    public void update(Product product, Long id) {
+    public void update(Product product, Long id, Long dtUpdate) {
         Product productFromBd = get(id);
-        product.setId(id);
-        product.setUserWhoCreate(productFromBd.getUserWhoCreate());
-        product.setCreateTime(productFromBd.getCreateTime());
-        product.setUpdateTime(LocalDateTime.now());
-        this.iProductDao.save(product);
+        productFromBd.setName(product.getName());
+        productFromBd.setBrand(product.getBrand());
+        productFromBd.setProtein(product.getProtein());
+        productFromBd.setFat(product.getFat());
+        productFromBd.setCarbohydrates(product.getCarbohydrates());
+        productFromBd.setCalories(product.getCalories());
+        productFromBd.setWeight(product.getWeight());
+        if (Objects.equals(dtUpdate, ConvertTime.fromDateToMilli(productFromBd.getUpdateTime()))) {
+            this.iProductDao.save(productFromBd);
+        } else {
+            throw new UpdateDeleteException();
+        }
     }
 
     @Override
-    public void delete(Long id) {
-        iProductDao.deleteById(id);
+    public void delete(Long id, Long dtUpdate) {
+        Product product = get(id);
+        if (Objects.equals(dtUpdate,ConvertTime.fromDateToMilli(product.getUpdateTime()))){
+            iProductDao.deleteById(id);
+        }else {
+            throw new UpdateDeleteException();
+        }
     }
 
 
-
 }
-

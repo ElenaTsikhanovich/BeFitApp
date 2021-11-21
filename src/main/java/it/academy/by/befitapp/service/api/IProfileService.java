@@ -10,4 +10,5 @@ public interface IProfileService {
     Long save(Profile profile);
     void update(Profile profile, Long id);
     void delete(Long id);
+    boolean checkCurrentUser(Long idProfile);
 }

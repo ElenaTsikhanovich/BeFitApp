@@ -1,10 +1,10 @@
 package it.academy.by.befitapp.controller.rest;
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import it.academy.by.befitapp.model.api.UserStatus;
+import it.academy.by.befitapp.security.JwtProvider;
 import it.academy.by.befitapp.dto.ListDto;
-import it.academy.by.befitapp.dto.LoginDto;
-import it.academy.by.befitapp.dto.UserDto;
+import it.academy.by.befitapp.dto.user.LoginDto;
+import it.academy.by.befitapp.dto.user.UserDto;
 import it.academy.by.befitapp.model.User;
 import it.academy.by.befitapp.service.api.IAuthService;
 import it.academy.by.befitapp.service.api.IUserService;
@@ -13,13 +13,9 @@ import it.academy.by.befitapp.service.validator.DataValidator;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 @RestController
@@ -28,32 +24,15 @@ public class UserController {
     private final IUserService iUserService;
     private final DataValidator dataValidator;
     private final IAuthService iAuthService;
+    private final JwtProvider jwtProvider;
 
-    public UserController(IUserService iUserService, DataValidator dataValidator, IAuthService iAuthService) {
+    public UserController(IUserService iUserService, DataValidator dataValidator, IAuthService iAuthService, JwtProvider jwtProvider) {
         this.iUserService = iUserService;
         this.dataValidator = dataValidator;
         this.iAuthService = iAuthService;
+        this.jwtProvider = jwtProvider;
     }
 
-    /*
-                @RequestMapping(method = RequestMethod.GET, value = "/{id}")
-                public ResponseEntity<?> get(@PathVariable("id") Long id){
-                    User user = this.iUserService.get(id);
-                    return new ResponseEntity<>(user, HttpStatus.OK);
-                }
-
-                @RequestMapping(method = RequestMethod.GET)
-                public ResponseEntity<?> getAll(@RequestParam (value = "page",required = false, defaultValue = "0")Integer page,
-                                                @RequestParam(value = "size",required = false, defaultValue = "30")Integer size){
-                    ListDto listDto = new ListDto();
-                    listDto.setPage(page);
-                    listDto.setSize(size);
-                    Page<User> users = this.iUserService.getAll(listDto);
-                    return new ResponseEntity<>(users, HttpStatus.OK);
-                }
-
-
-             */
     @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<?> getAll(@RequestParam (value = "page",required = false, defaultValue = "0")Integer page,
                                     @RequestParam(value = "size",required = false, defaultValue = "30")Integer size){
@@ -65,14 +44,17 @@ public class UserController {
             return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
-    @RequestMapping(method = RequestMethod.POST)
+    @RequestMapping(method = RequestMethod.POST,value = "/auth")
     public ResponseEntity<?> login(@RequestBody LoginDto loginDto) {
-        User byLogin = this.iAuthService.getByLoginAndPassword(loginDto);
-        if(byLogin!=null){
-            String token = getJWTToken(loginDto.getLogin());
+        User user = this.iAuthService.getByLoginAndPassword(loginDto);
+        if(user!=null){
+            String token = jwtProvider.generateToken(loginDto.getLogin());
             UserDto userDto = new UserDto();
-            userDto.setUser(byLogin);
-            userDto.setToken(token);
+            userDto.setUser(user);
+            userDto.setToken("Bearer "+token);
+            if (user.getUserStatus().equals(UserStatus.NO_ACTIVE)) {
+                this.iUserService.updateUserStatus(user.getId(),UserStatus.ACTIVE);
+            }
             return new ResponseEntity<>(userDto, HttpStatus.OK);
         }
         return new ResponseEntity<>("Зарегистрируйтесь!",HttpStatus.UNAUTHORIZED);
@@ -92,43 +74,27 @@ public class UserController {
                     HttpStatus.OK);
         }
         Long userId = this.iUserService.save(user);
-        //отправка письма и изменение статуса
-        //перенеправление опять на вход
-        //дальше можно создавать профиль
+        //отправка письма
         return new ResponseEntity<>(userId, HttpStatus.CREATED);
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/{id}")
     public ResponseEntity<?> update(@PathVariable("id") Long id,
                                     @RequestBody User user){
-        //теже валидации что и пр регистрации
+        //здесь админ меняет роль и статутс
         this.iUserService.update(user, id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @RequestMapping(method = RequestMethod.PATCH, value = "/{id}")
+    public ResponseEntity<?> update(@PathVariable("id") Long id){
+        //здесь юзер может поменять себе пароль
+        //его надо провалидировать как и при пост
+        //проверка что текущий юзер соответствует тому что собрался менять
+        return null;
+    }
      //метод patch для того чтобы пользователь мог поменять пароль
     //а PUT для админа чтобы мент роли и статусы
-
-
-    private String getJWTToken(String username) {
-        User user = this.iAuthService.getByLogin(username);
-        String secretKey = "mySecretKey";
-        List<GrantedAuthority> grantedAuthorities = AuthorityUtils
-                .commaSeparatedStringToAuthorityList(user.getRole().name());
-
-        String token = Jwts
-                .builder()
-                .setId("softtekTWT")
-                .setSubject(username)
-                .claim("authorities",
-                        grantedAuthorities.stream()
-                                .map(GrantedAuthority::getAuthority)
-                                .collect(Collectors.toList()))
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 600000))
-                .signWith(SignatureAlgorithm.HS512, secretKey.getBytes()).compact();
-
-        return "Bearer" + token;
-    }
 
 
 

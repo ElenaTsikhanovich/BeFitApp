@@ -1,10 +1,12 @@
 package it.academy.by.befitapp.controller.rest;
 
+import it.academy.by.befitapp.dto.dish.DishUpdateDto;
 import it.academy.by.befitapp.dto.ListDto;
 import it.academy.by.befitapp.dto.NutrientDto;
 import it.academy.by.befitapp.model.Dish;
 import it.academy.by.befitapp.service.api.IDishService;
-import it.academy.by.befitapp.utils.ICalculator;
+import it.academy.by.befitapp.utils.ConvertTime;
+import it.academy.by.befitapp.service.colculator.ICalculator;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,13 +31,14 @@ public class DishController {
                                  @RequestParam(value = "weight",required = false) Double weight){
         Dish dish = this.iDishService.get(id);
         if(weight!=null){
-            NutrientDto nutrientDto = new NutrientDto();
-            nutrientDto.setDish(dish);
-            nutrientDto.setWeight(weight);
             NutrientDto fullNutrientDto = this.iCalculator.nutrientsInDish(dish,weight);
+            fullNutrientDto.setDish(dish);
             return new ResponseEntity<>(fullNutrientDto,HttpStatus.OK);
         }
-        return new ResponseEntity<>(dish, HttpStatus.OK);
+        DishUpdateDto dishUpdateDto = new DishUpdateDto();
+        dishUpdateDto.setDish(dish);
+        dishUpdateDto.setUpdateTime(ConvertTime.fromDateToMilli(dish.getUpdateTime()));
+        return new ResponseEntity<>(dishUpdateDto, HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.GET)
@@ -57,23 +60,11 @@ public class DishController {
         return new ResponseEntity<>(dishId,HttpStatus.CREATED);
     }
 
-    //прописать блокировки
-    @RequestMapping(method = RequestMethod.PUT, value = "/{id}/dt_update/{dt_update}")
-    public ResponseEntity<?> update(@PathVariable("id") Long id,
-                                    @PathVariable("dt_update") Long dtUpdate,
-                                    @RequestBody Dish dish){
-        this.iDishService.update(dish,id);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
     @RequestMapping(method = RequestMethod.DELETE, value = "/{id}/dt_update/{dt_update}")
     public ResponseEntity<?> delete(@PathVariable("id") Long id,
                                     @PathVariable("dt_update")Long dtUpdate){
-        this.iDishService.delete(id);
+        this.iDishService.delete(id,dtUpdate);
         return new ResponseEntity<>(HttpStatus.OK);
     }
-
-    //TODO прописать все проверки на ошибки и нал
-    //придумать как внести список избранных
 
 }

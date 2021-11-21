@@ -1,12 +1,16 @@
 package it.academy.by.befitapp.dto;
 
 import it.academy.by.befitapp.model.Dish;
+import it.academy.by.befitapp.model.Journal;
 import it.academy.by.befitapp.model.Product;
 import it.academy.by.befitapp.model.Profile;
+
+import java.util.List;
 
 public class NutrientDto {
     private Product product;
     private Dish dish;
+    private List<Journal> foodByDay;
     private Double weight;
     private Double calories;
     private Double protein;
@@ -71,6 +75,14 @@ public class NutrientDto {
 
     public void setCarbohydrates(Double carbohydrates) {
         this.carbohydrates = carbohydrates;
+    }
+
+    public List<Journal> getFoodByDay() {
+        return foodByDay;
+    }
+
+    public void setFoodByDay(List<Journal> foodByDay) {
+        this.foodByDay = foodByDay;
     }
 }
 

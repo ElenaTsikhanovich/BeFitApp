@@ -8,7 +8,7 @@ import it.academy.by.befitapp.model.api.EntityType;
 import java.util.List;
 
 public interface IAuditService {
-    Audit get(Long id);
+    List<Audit> get(Long idUser);
     List<Audit> getAll();
     Long save(Audit audit);
 }

@@ -1,4 +1,4 @@
-package it.academy.by.befitapp.dto;
+package it.academy.by.befitapp.dto.user;
 
 import it.academy.by.befitapp.model.User;
 

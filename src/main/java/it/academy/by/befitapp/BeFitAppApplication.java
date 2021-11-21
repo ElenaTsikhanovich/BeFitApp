@@ -1,6 +1,5 @@
 package it.academy.by.befitapp;
 
-import it.academy.by.befitapp.controller.filter.JWTAuthorizationFilter;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Configuration;

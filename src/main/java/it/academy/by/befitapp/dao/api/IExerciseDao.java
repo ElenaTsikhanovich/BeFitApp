@@ -9,8 +9,8 @@ import java.time.LocalDateTime;
 
 public interface IExerciseDao extends JpaRepository<Exercise, Long> {
     Page<Exercise> findAllByProfileId(Long id, Pageable pageable);
-    Page<Exercise> findExerciseByUpdateTimeAfter(LocalDateTime after,Pageable pageable);
-    Page<Exercise> findExerciseByUpdateTimeBefore(LocalDateTime before,Pageable pageable);
-    Page<Exercise> findExerciseByUpdateTimeBetween(LocalDateTime after, LocalDateTime before,Pageable pageable);
+    Page<Exercise> findExerciseByProfileIdAndUpdateTimeAfter(Long idProfile,LocalDateTime after,Pageable pageable);
+    Page<Exercise> findExerciseByProfileIdAndUpdateTimeBefore(Long idProfile,LocalDateTime before,Pageable pageable);
+    Page<Exercise> findExerciseByProfileIdAndUpdateTimeBetween(Long idProfile,LocalDateTime after, LocalDateTime before,Pageable pageable);
     Exercise findExerciseByProfileIdAndId(Long profileId, Long id);
 }

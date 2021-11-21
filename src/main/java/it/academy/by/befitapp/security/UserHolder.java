@@ -10,4 +10,3 @@ public class UserHolder {
         return SecurityContextHolder.getContext().getAuthentication();
     }
 }
-//это бин чтобы видеть авторизованного пользователя и его можно брать от туда чтобы использовать в других сущностях

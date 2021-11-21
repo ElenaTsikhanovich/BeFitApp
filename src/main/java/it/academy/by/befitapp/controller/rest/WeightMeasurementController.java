@@ -1,16 +1,15 @@
 package it.academy.by.befitapp.controller.rest;
 
-import it.academy.by.befitapp.dto.ExercisesAndWeightSearchDto;
-import it.academy.by.befitapp.dto.ListDto;
+import it.academy.by.befitapp.dto.exercises.ExercisesAndWeightSearchDto;
+import it.academy.by.befitapp.dto.weightMeasurement.WeightMeasurementUpdateDto;
 import it.academy.by.befitapp.model.WeightMeasurement;
 import it.academy.by.befitapp.service.api.IWeightMeasurementService;
+import it.academy.by.befitapp.utils.ConvertTime;
 import org.springframework.data.domain.Page;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -27,10 +26,8 @@ public class WeightMeasurementController {
     public ResponseEntity<?> getAll(@PathVariable("id_profile") Long idProfile,
                                     @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
                                     @RequestParam(value = "size", required = false, defaultValue = "30") Integer size,
-                                    @RequestParam(value = "dt_start", required = false)
-                                    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
-                                    @RequestParam(value = "dt_end", required = false)
-                                    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
+                                    @RequestParam(value = "dt_start", required = false)Long start,
+                                    @RequestParam(value = "dt_end", required = false)Long end) {
         ExercisesAndWeightSearchDto exercisesAndWeightSearchDto = new ExercisesAndWeightSearchDto();
         exercisesAndWeightSearchDto.setPage(page);
         exercisesAndWeightSearchDto.setSize(size);
@@ -45,7 +42,10 @@ public class WeightMeasurementController {
     public ResponseEntity<?> get(@PathVariable("id_profile") Long idProfile,
                                  @PathVariable("id_weight") Long idWeight) {
         WeightMeasurement weightMeasurement = this.iWeightMeasurementService.get(idProfile, idWeight);
-        return new ResponseEntity<>(weightMeasurement, HttpStatus.OK);
+        WeightMeasurementUpdateDto weightMeasurementUpdateDto = new WeightMeasurementUpdateDto();
+        weightMeasurementUpdateDto.setWeightMeasurement(weightMeasurement);
+        weightMeasurementUpdateDto.setUpdateTime(ConvertTime.fromDateToMilli(weightMeasurement.getUpdateTime()));
+        return new ResponseEntity<>(weightMeasurementUpdateDto, HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.POST)
@@ -60,7 +60,7 @@ public class WeightMeasurementController {
                                     @PathVariable("id_weight")Long idWeight,
                                     @PathVariable("dt_update")Long dtUpdate,
                                     @RequestBody WeightMeasurement weightMeasurement) {
-        this.iWeightMeasurementService.update(weightMeasurement, idProfile, idWeight);
+        this.iWeightMeasurementService.update(weightMeasurement, idProfile, idWeight,dtUpdate);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -68,9 +68,7 @@ public class WeightMeasurementController {
     public ResponseEntity<?> delete(@PathVariable("id_profile") Long idProfile,
                                     @PathVariable("id_weight")Long idWeight,
                                     @PathVariable("dt_update")Long dtUpdate) {
-        this.iWeightMeasurementService.delete(idWeight);
+        this.iWeightMeasurementService.delete(idProfile,idWeight,dtUpdate);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }
-//переписать апдейты и делиты
-//сделать правильные урлы

@@ -9,6 +9,7 @@ import it.academy.by.befitapp.service.api.IAuthService;
 import it.academy.by.befitapp.service.api.IUserService;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.After;
+import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.springframework.stereotype.Service;
@@ -28,23 +29,26 @@ public class UserAuditService {
         this.iAuthService = iAuthService;
     }
 
-    @After("execution(* it.academy.by.befitapp.service.UserService.save(..))")
-    public void saveUser(JoinPoint joinPoint){
+    @AfterReturning(value = "execution(* it.academy.by.befitapp.service.UserService.save(..))",returning = "result")
+    public void saveUser(JoinPoint joinPoint,Object result){
         try {
             Object[] args = joinPoint.getArgs();
             User user = (User) args[0];
+            Long id = (Long) result;
             Audit audit = new Audit();
             audit.setCreateTime(user.getUpdateTime());
             audit.setText("Пользователь "+user.getName()+" зарегистрировался в приложении!");
             audit.setEntityType(EntityType.USER);
-            audit.setEntityId(user.getId());
+            audit.setEntityId(id);
             this.iAuditService.save(audit);
         }catch (Throwable e){
             throw new IllegalArgumentException("Ошибка работы аудита");
         }
     }
 
-    @After("execution(* it.academy.by.befitapp.service.UserService.update(..))")
+    //методы аудита апдейта тоже придется переписать скорее всего их будет несколкьо
+
+    @AfterReturning("execution(* it.academy.by.befitapp.service.UserService.update(..))")
     public void updateUser(JoinPoint joinPoint){
         try {
             Object[] args = joinPoint.getArgs();
@@ -56,7 +60,7 @@ public class UserAuditService {
             User userByLogin = this.iAuthService.getByLogin(userLogin);
             audit.setUser(userByLogin);
             audit.setEntityType(EntityType.USER);
-            audit.setEntityId(user.getId());
+            audit.setEntityId(userByLogin.getId());
             this.iAuditService.save(audit);
         }catch (Throwable e){
             throw new IllegalArgumentException("Ошибка работы аудита");
@@ -64,4 +68,3 @@ public class UserAuditService {
     }
 
 }
-//можно попробовать совместить эти два метода

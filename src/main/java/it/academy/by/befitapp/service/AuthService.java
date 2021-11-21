@@ -1,7 +1,7 @@
 package it.academy.by.befitapp.service;
 
 import it.academy.by.befitapp.dao.api.IUserDao;
-import it.academy.by.befitapp.dto.LoginDto;
+import it.academy.by.befitapp.dto.user.LoginDto;
 import it.academy.by.befitapp.model.User;
 import it.academy.by.befitapp.service.api.IAuthService;
 import org.springframework.security.crypto.password.PasswordEncoder;
