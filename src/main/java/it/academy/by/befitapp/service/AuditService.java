@@ -2,12 +2,9 @@ package it.academy.by.befitapp.service;
 
 import it.academy.by.befitapp.dao.api.IAuditDao;
 import it.academy.by.befitapp.model.Audit;
-import it.academy.by.befitapp.model.api.EAuditAction;
-import it.academy.by.befitapp.model.api.EntityType;
 import it.academy.by.befitapp.service.api.IAuditService;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 @Service
 public class AuditService implements IAuditService {

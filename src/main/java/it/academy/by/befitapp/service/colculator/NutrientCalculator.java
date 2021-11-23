@@ -1,13 +1,16 @@
 package it.academy.by.befitapp.service.colculator;
 
 import it.academy.by.befitapp.dto.NutrientDto;
-import it.academy.by.befitapp.model.Dish;
-import it.academy.by.befitapp.model.Ingredient;
-import it.academy.by.befitapp.model.Journal;
-import it.academy.by.befitapp.model.Product;
+import it.academy.by.befitapp.model.*;
+import it.academy.by.befitapp.model.api.Gender;
+import it.academy.by.befitapp.model.api.LifeStyle;
+import it.academy.by.befitapp.model.api.WeightGoal;
 import it.academy.by.befitapp.service.colculator.ICalculator;
+import it.academy.by.befitapp.utils.ConvertTime;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Component
@@ -57,7 +60,7 @@ public class NutrientCalculator implements ICalculator {
         return result;
     }
 
-    public NutrientDto nutrientsAll(List<Journal> journals) {
+    public NutrientDto nutrientsInJournal(List<Journal> journals) {
         double proteinDay = 0;
         double fatDay = 0;
         double carbohydratesDay = 0;
@@ -79,12 +82,62 @@ public class NutrientCalculator implements ICalculator {
             }
         }
         NutrientDto nutrientInDay = new NutrientDto();
-        nutrientInDay.setFoodByDay(journals);
         nutrientInDay.setProtein(proteinDay);
         nutrientInDay.setFat(fatDay);
         nutrientInDay.setCarbohydrates(carbohydratesDay);
         nutrientInDay.setCalories(caloriesDay);
         return nutrientInDay;
     }
+
+    public Double getCaloriesNorm(Profile profile){
+        long age = ChronoUnit.YEARS.between(profile.getDateOfBirth(),LocalDate.now());
+        double calories=0;
+        if (profile.getGender().equals(Gender.FEMALE)){
+            calories =
+                    (10* profile.getWeightActual())+(6.25* profile.getHeight())-(5*age)-161;
+        }else {
+            calories =
+                    (10* profile.getWeightActual())+(6.25* profile.getHeight())-(5*age)+5;
+        }
+        if (profile.getLifeStyle().equals(LifeStyle.LOW)){
+            calories*=1.2;
+        }
+        if (profile.getLifeStyle().equals(LifeStyle.LIGHT)){
+            calories*=1.375;
+        }
+        if (profile.getLifeStyle().equals(LifeStyle.HEIGHT)){
+            calories*=1.7;
+        }
+        if (profile.getLifeStyle().equals(LifeStyle.VERY_HEIGHT)){
+            calories*=1.9;
+        }
+        final double ceil = Math.ceil(calories);
+        return ceil;
+    }
+
+    public Double caloriesForGoal(Profile profile){
+        Double caloriesNorm = getCaloriesNorm(profile);
+
+        if (profile.getWeightGoal().equals(WeightGoal.KEEP)){
+            return caloriesNorm;
+        }
+        if (profile.getWeightGoal().equals(WeightGoal.GAIN_MIN)){
+            return caloriesNorm+=caloriesNorm*0.1;
+        }
+        if (profile.getWeightGoal().equals(WeightGoal.GAIN_MAX)){
+            return caloriesNorm+=caloriesNorm*0.3;
+        }
+        if (profile.getWeightGoal().equals(WeightGoal.LOSE_MIN)){
+            return caloriesNorm-=caloriesNorm*0.1;
+        }
+        if (profile.getWeightGoal().equals(WeightGoal.LOSE_MAX)){
+            return caloriesNorm-=caloriesNorm*0.3;
+        }
+
+        return caloriesNorm;
+    }
+
+
+
 
 }

@@ -10,7 +10,6 @@ import java.util.List;
 public class NutrientDto {
     private Product product;
     private Dish dish;
-    private List<Journal> foodByDay;
     private Double weight;
     private Double calories;
     private Double protein;
@@ -77,12 +76,5 @@ public class NutrientDto {
         this.carbohydrates = carbohydrates;
     }
 
-    public List<Journal> getFoodByDay() {
-        return foodByDay;
-    }
-
-    public void setFoodByDay(List<Journal> foodByDay) {
-        this.foodByDay = foodByDay;
-    }
 }
 

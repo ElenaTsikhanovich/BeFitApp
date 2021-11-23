@@ -7,6 +7,5 @@ public enum EntityType {
     USER,
     PROFILE,
     EXERCISES,
-    LIFESTYLE,
     WEIGHT_MEASUREMENT
 }

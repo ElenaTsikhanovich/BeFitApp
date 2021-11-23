@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface IAuditDao extends JpaRepository<Audit, Long> {
-    List<Audit> findAllByUserId(Long idUser);
+    List<Audit> findAllByUserId(Long userId);
 }

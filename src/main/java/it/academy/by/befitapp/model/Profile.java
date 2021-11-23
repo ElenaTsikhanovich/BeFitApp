@@ -32,7 +32,7 @@ public class Profile implements Serializable {
     private Double weightTarget;
 
     @Column(name = "dateOfBirth")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd.MM.yyyy")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy:MM:dd")
     private LocalDate dateOfBirth;
 
     @Column(name = "gender")

@@ -1,10 +1,12 @@
 package it.academy.by.befitapp.controller.rest;
 
+import it.academy.by.befitapp.dto.journal.JournalOfDayDto;
 import it.academy.by.befitapp.dto.journal.JournalSearchDto;
 import it.academy.by.befitapp.dto.journal.JournalUpdateDto;
 import it.academy.by.befitapp.dto.NutrientDto;
 import it.academy.by.befitapp.model.Journal;
 import it.academy.by.befitapp.service.api.IJournalService;
+import it.academy.by.befitapp.service.api.IProfileService;
 import it.academy.by.befitapp.utils.ConvertTime;
 import it.academy.by.befitapp.service.colculator.ICalculator;
 import org.springframework.data.domain.Page;
@@ -19,10 +21,12 @@ import java.util.List;
 public class JournalController {
     private final IJournalService iJournalService;
     private final ICalculator iCalculator;
+    private final IProfileService iProfileService;
 
-    public JournalController(IJournalService iJournalService, ICalculator iCalculator) {
+    public JournalController(IJournalService iJournalService, ICalculator iCalculator, IProfileService iProfileService) {
         this.iJournalService = iJournalService;
         this.iCalculator = iCalculator;
+        this.iProfileService = iProfileService;
     }
 
     @RequestMapping(method = RequestMethod.GET)
@@ -48,9 +52,13 @@ public class JournalController {
         journalSearchDto.setSize(size);
         Page<Journal> journalPage = this.iJournalService.getAll(idProfile, journalSearchDto);
         List<Journal> journals = journalPage.getContent();
-        NutrientDto nutrientDto = this.iCalculator.nutrientsAll(journals);
-        nutrientDto.setFoodByDay(journals);
-        return new ResponseEntity<>(nutrientDto, HttpStatus.OK);
+        JournalOfDayDto journalOfDayDto = new JournalOfDayDto();
+        journalOfDayDto.setJournals(journals);
+        journalOfDayDto.setNutrientDto(this.iCalculator.nutrientsInJournal(journals));
+        Double caloriesNorm = this.iCalculator.getCaloriesNorm(this.iProfileService.get(idProfile));
+        journalOfDayDto.setDayNorm(caloriesNorm);
+        journalOfDayDto.setGoal(this.iCalculator.caloriesForGoal(this.iProfileService.get(idProfile)));
+        return new ResponseEntity<>(journalOfDayDto, HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/{id_food}")
@@ -60,7 +68,7 @@ public class JournalController {
         JournalUpdateDto journalUpdateDto = new JournalUpdateDto();
         journalUpdateDto.setJournal(journal);
         journalUpdateDto.setUpdateTime(ConvertTime.fromDateToMilli(journal.getUpdateTime()));
-        NutrientDto nutrientDto = this.iCalculator.nutrientsAll(List.of(journal));
+        NutrientDto nutrientDto = this.iCalculator.nutrientsInJournal(List.of(journal));
         journalUpdateDto.setNutrientDto(nutrientDto);
         return new ResponseEntity<>(journalUpdateDto, HttpStatus.OK);
     }

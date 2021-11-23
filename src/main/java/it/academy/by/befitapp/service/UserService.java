@@ -1,11 +1,15 @@
 package it.academy.by.befitapp.service;
 
+import it.academy.by.befitapp.dao.api.IConformationTokenDao;
 import it.academy.by.befitapp.dao.api.IUserDao;
 import it.academy.by.befitapp.dto.ListDto;
+import it.academy.by.befitapp.exception.ElementNotFoundException;
+import it.academy.by.befitapp.model.ConformationToken;
 import it.academy.by.befitapp.model.User;
 import it.academy.by.befitapp.model.api.Role;
 import it.academy.by.befitapp.model.api.UserStatus;
 import it.academy.by.befitapp.service.api.IUserService;
+import it.academy.by.befitapp.service.mail.IMailService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,17 +22,21 @@ import java.time.LocalDateTime;
 public class UserService implements IUserService {
     private final IUserDao iUserDao;
     private final PasswordEncoder passwordEncoder;
+    private final IMailService iMailService;
+    private final IConformationTokenDao iConformationTokenDao;
 
-
-    public UserService(IUserDao iUserDao, PasswordEncoder passwordEncoder) {
+    public UserService(IUserDao iUserDao, PasswordEncoder passwordEncoder, IMailService iMailService,
+                       IConformationTokenDao iConformationTokenDao) {
         this.iUserDao = iUserDao;
         this.passwordEncoder = passwordEncoder;
+        this.iMailService = iMailService;
+        this.iConformationTokenDao = iConformationTokenDao;
     }
 
     @Override
     public User get(Long id) {
         User user = this.iUserDao.findById(id).orElseThrow(
-                () -> new IllegalArgumentException("данных с таким id нет"));
+                ElementNotFoundException::new);
         return user;
     }
 
@@ -45,10 +53,14 @@ public class UserService implements IUserService {
         user.setUpdateTime(createTime);
         user.setRole(Role.ROLE_USER);
         user.setUserStatus(UserStatus.NO_ACTIVE);
-        String encode = this.passwordEncoder.encode(user.getPassword());
+        String password = user.getPassword();
+        String encode = this.passwordEncoder.encode(password);
         user.setPassword(encode);
-        User saveUser = this.iUserDao.save(user);
-        Long id = saveUser.getId();
+        User savedUser = this.iUserDao.save(user);
+        ConformationToken conformationToken = new ConformationToken(savedUser);
+        this.iConformationTokenDao.save(conformationToken);
+        this.iMailService.sendEmail(savedUser,conformationToken.getConformationToken());
+        Long id = savedUser.getId();
         return id;
     }
 
@@ -56,7 +68,6 @@ public class UserService implements IUserService {
     public void update(User user, Long id) {
         User userFromBd = get(id);
         user.setId(id);
-        user.setUserStatus(UserStatus.ACTIVE);
         user.setCreateTime(userFromBd.getCreateTime());
         user.setUpdateTime(LocalDateTime.now());
         user.setRole(userFromBd.getRole());

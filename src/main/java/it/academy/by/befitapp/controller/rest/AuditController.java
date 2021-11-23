@@ -26,14 +26,19 @@ public class AuditController {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public ResponseEntity<?> get(){
-        String userLogin = this.userHolder.getAuthentication().getName();
-        User user = this.iAuthService.getByLogin(userLogin);
-        if (user.getRole().equals(Role.ROLE_ADMIN)){
+    public ResponseEntity<?> getAll(){
             List<Audit> audits = this.iAuditService.getAll();
             return new ResponseEntity<>(audits,HttpStatus.OK);
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "/{id}")
+    public ResponseEntity<?> get(@PathVariable("id") Long id){
+        String userLogin = this.userHolder.getAuthentication().getName();
+        User user = this.iAuthService.getByLogin(userLogin);
+       if (user.getId().equals(id)){
+            List<Audit> audits = this.iAuditService.get(id);
+            return new ResponseEntity<>(audits, HttpStatus.OK);
         }
-        List<Audit> audits = this.iAuditService.get(user.getId());
-        return new ResponseEntity<>(audits, HttpStatus.OK);
+      return new ResponseEntity<>("Вы не можете смотреть аудит по другим пользователям", HttpStatus.OK);
     }
 }

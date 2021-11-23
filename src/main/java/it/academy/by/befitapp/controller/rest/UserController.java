@@ -1,5 +1,6 @@
 package it.academy.by.befitapp.controller.rest;
 
+import it.academy.by.befitapp.model.ConformationToken;
 import it.academy.by.befitapp.model.api.UserStatus;
 import it.academy.by.befitapp.security.JwtProvider;
 import it.academy.by.befitapp.dto.ListDto;
@@ -46,18 +47,16 @@ public class UserController {
 
     @RequestMapping(method = RequestMethod.POST,value = "/auth")
     public ResponseEntity<?> login(@RequestBody LoginDto loginDto) {
+        //проверить статус пользователя
         User user = this.iAuthService.getByLoginAndPassword(loginDto);
-        if(user!=null){
+        if(user!=null && user.getUserStatus().equals(UserStatus.ACTIVE)){
             String token = jwtProvider.generateToken(loginDto.getLogin());
             UserDto userDto = new UserDto();
             userDto.setUser(user);
             userDto.setToken("Bearer "+token);
-            if (user.getUserStatus().equals(UserStatus.NO_ACTIVE)) {
-                this.iUserService.updateUserStatus(user.getId(),UserStatus.ACTIVE);
-            }
             return new ResponseEntity<>(userDto, HttpStatus.OK);
         }
-        return new ResponseEntity<>("Зарегистрируйтесь!",HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>("Вы не зарегистрированы либо не активаривали аккаунт!",HttpStatus.UNAUTHORIZED);
     }
 
     @RequestMapping(method = RequestMethod.POST,value = "/registration")
@@ -73,9 +72,17 @@ public class UserController {
                     "хотя бы одну букву нижнего и верхнего регистра, хотя бы один специальный символ \"@#_$%^&+=\"",
                     HttpStatus.OK);
         }
-        Long userId = this.iUserService.save(user);
-        //отправка письма
-        return new ResponseEntity<>(userId, HttpStatus.CREATED);
+        this.iUserService.save(user);
+        return new ResponseEntity<>("На ваш почтовый адрес отправлено письмо для активации аккаунта", HttpStatus.CREATED);
+    }
+
+    @RequestMapping(method = RequestMethod.GET,value = "/confirm")
+    public ResponseEntity<?> confirm(@RequestParam(value = "confirm")String confirmToken){
+        boolean isTokenValid = this.iAuthService.checkConformationToken(confirmToken);
+        if (isTokenValid){
+            return new ResponseEntity<>("Теперь вы можете пользоваться своим логином и паролем",HttpStatus.OK);
+        }
+        return new ResponseEntity<>("Срок действия ссылки истек",HttpStatus.BAD_REQUEST);
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/{id}")
