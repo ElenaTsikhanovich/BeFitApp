@@ -35,7 +35,7 @@ public class SupportController {
               stream.write(bytes);
               stream.close();
               this.productBaseExelParser.parseXlsFileToDB(name);
-              return new ResponseEntity<>("is ok", HttpStatus.OK);
+              return new ResponseEntity<>("Данные успешно загружены", HttpStatus.OK);
           }catch (IOException e){
               e.printStackTrace();
           }
@@ -47,16 +47,5 @@ public class SupportController {
       }
     }
 
-
-
-
-/*
-    @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity<?> fillingDB(@RequestParam("fileName")String fileName){
-        this.productBaseExelParser.parseXlsFileToDB(fileName);
-        return new ResponseEntity<>("Данные успешно загружены", HttpStatus.CREATED);
-    }
-
- */
 }
 
