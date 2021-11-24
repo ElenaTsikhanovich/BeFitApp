@@ -87,6 +87,7 @@ public class UserController {
     @RequestMapping(method = RequestMethod.PATCH, value = "/{id}")
     public ResponseEntity<?> update(@PathVariable("id") Long id){
         //здесь юзер может поменять себе пароль
+        //нужно дто чтобы изменить пароль
         //его надо провалидировать как и при пост
         //проверка что текущий юзер соответствует тому что собрался менять
         return null;
