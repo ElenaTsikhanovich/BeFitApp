@@ -1,6 +1,8 @@
 package it.academy.by.befitapp.model;
 
 import it.academy.by.befitapp.model.api.EntityType;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -23,6 +25,7 @@ public class Audit implements Serializable {
     private String text;
 
     @Column(name = "entityType")
+    @Enumerated(EnumType.STRING)
     private EntityType entityType;
 
     @Column(name = "entityId")

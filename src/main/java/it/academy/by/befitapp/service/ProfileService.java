@@ -3,6 +3,7 @@ package it.academy.by.befitapp.service;
 import it.academy.by.befitapp.dao.api.IProfileDao;
 import it.academy.by.befitapp.dto.ListDto;
 import it.academy.by.befitapp.exception.ElementNotFoundException;
+import it.academy.by.befitapp.exception.MoreThenOneProfileException;
 import it.academy.by.befitapp.exception.NoRightsForChangeException;
 import it.academy.by.befitapp.model.Profile;
 import it.academy.by.befitapp.model.User;
@@ -48,6 +49,10 @@ public class ProfileService implements IProfileService {
     public Long save(Profile profile) {
         String userLogin = this.userHolder.getAuthentication().getName();
         User userByLogin = this.iAuthService.getByLogin(userLogin);
+        Profile profileByUserId = this.iProfileDao.findProfileByUserId(userByLogin.getId());
+        if (profileByUserId!=null){
+            throw new MoreThenOneProfileException();
+        }
         profile.setUser(userByLogin);
         LocalDateTime createTime = LocalDateTime.now();
         profile.setCreateTime(createTime);
@@ -65,6 +70,7 @@ public class ProfileService implements IProfileService {
             profileFromBd.setDateOfBirth(profile.getDateOfBirth());
             profileFromBd.setGender(profile.getGender());
             profileFromBd.setLifeStyle(profile.getLifeStyle());
+            profileFromBd.setWeightActual(profile.getWeightActual());
             profileFromBd.setWeightGoal(profile.getWeightGoal());
             profileFromBd.setWeightTarget(profile.getWeightTarget());
             this.iProfileDao.save(profileFromBd);
@@ -88,8 +94,7 @@ public class ProfileService implements IProfileService {
         User currentUser = this.iAuthService.getByLogin(userLogin);
         Profile profile = get(idProfile);
         User profileUser = profile.getUser();
-        return (Objects.equals(currentUser.getId(), profileUser.getId())
-                || currentUser.getRole().equals(Role.ROLE_ADMIN));
+        return (Objects.equals(currentUser.getId(), profileUser.getId()));
     }
 
 }

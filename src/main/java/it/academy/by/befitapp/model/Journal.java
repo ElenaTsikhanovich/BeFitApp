@@ -17,6 +17,7 @@ public class Journal implements Serializable {
     private Profile profile;
 
     @Column(name = "eatingTime")
+    @Enumerated(EnumType.STRING)
     private EatingTime eatingTime;
 
     @OneToOne

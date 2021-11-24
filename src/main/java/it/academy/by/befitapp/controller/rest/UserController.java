@@ -45,9 +45,17 @@ public class UserController {
             return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
+    @RequestMapping(method = RequestMethod.GET,value = "/confirm")
+    public ResponseEntity<?> confirm(@RequestParam(value = "confirm")String confirmToken){
+        boolean isTokenValid = this.iAuthService.checkConformationToken(confirmToken);
+        if (isTokenValid){
+            return new ResponseEntity<>("Теперь вы можете пользоваться своим логином и паролем",HttpStatus.OK);
+        }
+        return new ResponseEntity<>("Срок действия ссылки истек",HttpStatus.BAD_REQUEST);
+    }
+
     @RequestMapping(method = RequestMethod.POST,value = "/auth")
     public ResponseEntity<?> login(@RequestBody LoginDto loginDto) {
-        //проверить статус пользователя
         User user = this.iAuthService.getByLoginAndPassword(loginDto);
         if(user!=null && user.getUserStatus().equals(UserStatus.ACTIVE)){
             String token = jwtProvider.generateToken(loginDto.getLogin());
@@ -76,23 +84,6 @@ public class UserController {
         return new ResponseEntity<>("На ваш почтовый адрес отправлено письмо для активации аккаунта", HttpStatus.CREATED);
     }
 
-    @RequestMapping(method = RequestMethod.GET,value = "/confirm")
-    public ResponseEntity<?> confirm(@RequestParam(value = "confirm")String confirmToken){
-        boolean isTokenValid = this.iAuthService.checkConformationToken(confirmToken);
-        if (isTokenValid){
-            return new ResponseEntity<>("Теперь вы можете пользоваться своим логином и паролем",HttpStatus.OK);
-        }
-        return new ResponseEntity<>("Срок действия ссылки истек",HttpStatus.BAD_REQUEST);
-    }
-
-    @RequestMapping(method = RequestMethod.PUT, value = "/{id}")
-    public ResponseEntity<?> update(@PathVariable("id") Long id,
-                                    @RequestBody User user){
-        //здесь админ меняет роль и статутс
-        this.iUserService.update(user, id);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
     @RequestMapping(method = RequestMethod.PATCH, value = "/{id}")
     public ResponseEntity<?> update(@PathVariable("id") Long id){
         //здесь юзер может поменять себе пароль
@@ -100,8 +91,6 @@ public class UserController {
         //проверка что текущий юзер соответствует тому что собрался менять
         return null;
     }
-     //метод patch для того чтобы пользователь мог поменять пароль
-    //а PUT для админа чтобы мент роли и статусы
 
 
 

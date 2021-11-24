@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -56,7 +57,7 @@ public class DishService implements IDishService {
         LocalDateTime createTime = LocalDateTime.now();
         dish.setCreateTime(createTime);
         dish.setUpdateTime(createTime);
-        saveIngredients(dish.getIngredients());
+        dish.setIngredients(saveIngredients(dish.getIngredients()));
         Dish saveDish = this.iDishDao.save(dish);
         Long id = saveDish.getId();
         return id;
@@ -72,10 +73,13 @@ public class DishService implements IDishService {
         }
     }
 
-    private void saveIngredients(List<Ingredient> ingredients){
+    private List<Ingredient>  saveIngredients(List<Ingredient> ingredients){
+        List<Ingredient> ingredientList = new ArrayList<>();
         for(Ingredient ingredient:ingredients){
-            this.ingredientService.save(ingredient);
+            Ingredient ingredientSaved = this.ingredientService.save(ingredient);
+            ingredientList.add(ingredientSaved);
         }
+        return ingredientList;
     }
 
 }

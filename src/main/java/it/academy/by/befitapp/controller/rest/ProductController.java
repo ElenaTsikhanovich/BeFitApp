@@ -25,12 +25,12 @@ public class ProductController {
         this.iCalculator = iCalculator;
     }
 
-    @RequestMapping(method = RequestMethod.GET,value = "/{id}")
-    public ResponseEntity<?> get(@PathVariable("id")Long id,
-                                 @RequestParam(value = "weight",required = false) Double weight) {
+    @RequestMapping(method = RequestMethod.GET, value = "/{id}")
+    public ResponseEntity<?> get(@PathVariable("id") Long id,
+                                 @RequestParam(value = "weight", required = false) Double weight) {
         Product product = this.iProductService.get(id);
-        if(weight!=null){
-            NutrientDto nutrientDto = this.iCalculator.nutrientsInProduct(product,weight);
+        if (weight != null) {
+            NutrientDto nutrientDto = this.iCalculator.nutrientsInProduct(product, weight);
             nutrientDto.setProduct(product);
             return new ResponseEntity<>(nutrientDto, HttpStatus.OK);
         }
@@ -41,12 +41,12 @@ public class ProductController {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public ResponseEntity<?> getAll(@RequestParam (value = "page",required = false, defaultValue = "0")Integer page,
-                                                @RequestParam(value = "size",required = false, defaultValue = "30")Integer size,
-                                                @RequestParam(value = "name",required = false)String name,
-                                                @RequestParam(value = "brand",required = false)String brand,
-                                                @RequestParam(value = "caloriesAfter",required = false)Double caloriesAfter,
-                                                @RequestParam(value = "caloriesBefore",required = false)Double caloriesBefore){
+    public ResponseEntity<?> getAll(@RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
+                                    @RequestParam(value = "size", required = false, defaultValue = "30") Integer size,
+                                    @RequestParam(value = "name", required = false) String name,
+                                    @RequestParam(value = "brand", required = false) String brand,
+                                    @RequestParam(value = "caloriesAfter", required = false) Double caloriesAfter,
+                                    @RequestParam(value = "caloriesBefore", required = false) Double caloriesBefore) {
         ProductSearchDto productSearchDto = new ProductSearchDto();
         productSearchDto.setPage(page);
         productSearchDto.setSize(size);
@@ -56,31 +56,29 @@ public class ProductController {
         productSearchDto.setCaloriesBefore(caloriesBefore);
         Page<Product> productsPage = this.iProductService.getAll(productSearchDto);
         List<Product> products = productsPage.getContent();
-        return new ResponseEntity<>(products,HttpStatus.OK);
+        return new ResponseEntity<>(products, HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity<?> save(@RequestBody Product product){
+    public ResponseEntity<?> save(@RequestBody Product product) {
         Long productId = this.iProductService.save(product);
-        return new ResponseEntity<>(productId,HttpStatus.CREATED);
+        return new ResponseEntity<>(productId, HttpStatus.CREATED);
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/{id}/dt_update/{dt_update}")
-    public ResponseEntity<?> update(@PathVariable("id")Long id,
+    public ResponseEntity<?> update(@PathVariable("id") Long id,
                                     @PathVariable("dt_update") Long dtUpdate,
-                                    @RequestBody Product product){
-        this.iProductService.update(product, id,dtUpdate);
+                                    @RequestBody Product product) {
+        this.iProductService.update(product, id, dtUpdate);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.DELETE, value = "/{id}/dt_update/{dt_update}")
-    public ResponseEntity<?> delete(@PathVariable("id")Long id,
-                                    @PathVariable("dt_update") Long dtUpdate){
-        this.iProductService.delete(id,dtUpdate);
+    public ResponseEntity<?> delete(@PathVariable("id") Long id,
+                                    @PathVariable("dt_update") Long dtUpdate) {
+        this.iProductService.delete(id, dtUpdate);
         return new ResponseEntity<>(HttpStatus.OK);
 
     }
 
 }
-//TODO  обработать ошибки в контроллерах и сервисе и расставить статусы ответа
-//занесения продукта в список избранных

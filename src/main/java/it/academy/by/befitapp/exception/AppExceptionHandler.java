@@ -42,6 +42,16 @@ public class AppExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(exceptionMessage,HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(MoreThenOneProfileException.class)
+    public ResponseEntity<?> moreThenOneProfile(){
+        ExceptionMessage exceptionMessage = new ExceptionMessage(
+                HttpStatus.FORBIDDEN.value(),
+                "Один пользователь не может иметь больше одного профиля",
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm dd:MM:yyyy"))
+        );
+        return new ResponseEntity<>(exceptionMessage,HttpStatus.FORBIDDEN);
+    }
+
    /* @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<?> otherExceptions(){
         ExceptionMessage exceptionMessage = new ExceptionMessage(

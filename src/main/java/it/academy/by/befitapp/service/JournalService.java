@@ -91,14 +91,16 @@ public class JournalService implements IJournalService {
             dairyFromBd.setWeight(dairy.getWeight());
             if (dairy.getProduct()!=null){
                 Product product = this.iProductService.get(dairy.getProduct().getId());
-                dairy.setProduct(product);
+                dairyFromBd.setProduct(product);
+                dairyFromBd.setDish(null);
             }
             if (dairy.getDish()!=null){
                 Dish dish = this.iDishService.get(dairy.getDish().getId());
-                dairy.setDish(dish);
+                dairyFromBd.setDish(dish);
+                dairyFromBd.setProduct(null);
             }
             if (Objects.equals(dtUpdate, ConvertTime.fromDateToMilli(dairyFromBd.getUpdateTime()))) {
-                this.iJournalDao.save(dairy);
+                this.iJournalDao.save(dairyFromBd);
             } else {
                 throw new UpdateDeleteException();
             }

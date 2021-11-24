@@ -41,11 +41,11 @@ public class ProductService implements IProductService {
         Pageable pageable = PageRequest.of(productSearchDto.getPage(), productSearchDto.getSize());
 
         if (productSearchDto.getName() != null && productSearchDto.getBrand() != null) {
-            return this.iProductDao.findProductByNameAndBrand(
+            return this.iProductDao.findProductByNameContainsAndBrand(
                     productSearchDto.getName(), productSearchDto.getBrand(), pageable);
         }
         if (productSearchDto.getName() != null) {
-            return this.iProductDao.findProductByName(productSearchDto.getName(), pageable);
+            return this.iProductDao.findProductsByNameContaining(productSearchDto.getName(), pageable);
         }
         if (productSearchDto.getBrand() != null) {
             return this.iProductDao.findProductByBrand(productSearchDto.getBrand(), pageable);

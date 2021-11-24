@@ -21,13 +21,13 @@ public class NutrientCalculator implements ICalculator {
         Double customWeight = weight;
         NutrientDto nutrientDto = new NutrientDto();
         double proteinFinal = product.getProtein() / weightInProduct * customWeight;
-        nutrientDto.setProtein(proteinFinal);
+        nutrientDto.setProtein(Math.round(proteinFinal*100)/100.0);
         double fatFinal = product.getFat() / weightInProduct * customWeight;
-        nutrientDto.setFat(fatFinal);
+        nutrientDto.setFat(Math.round(fatFinal*100)/100.0);
         double carbohydratesFinal = product.getCarbohydrates() / weightInProduct * customWeight;
-        nutrientDto.setCarbohydrates(carbohydratesFinal);
+        nutrientDto.setCarbohydrates(Math.round(carbohydratesFinal*100)/100.00);
         double caloriesFinal = product.getCalories() / weightInProduct * customWeight;
-        nutrientDto.setCalories(caloriesFinal);
+        nutrientDto.setCalories(Math.round(caloriesFinal*100)/100.0);
 
         return nutrientDto;
     }
@@ -46,7 +46,7 @@ public class NutrientCalculator implements ICalculator {
             fatInDish += nutrientInIngredient.getFat();
             caloriesInDish += nutrientInIngredient.getCarbohydrates();
             caloriesInDish += nutrientInIngredient.getCalories();
-            weightOfDish += nutrientInIngredient.getWeight();
+            weightOfDish += item.getWeight();
         }
         Product productTemp = new Product();
         productTemp.setProtein(proteinInDish);

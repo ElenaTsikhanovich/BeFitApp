@@ -25,9 +25,11 @@ public class User implements Serializable {
     private String password;
 
     @Column(name = "role")
+    @Enumerated(EnumType.STRING)
     private Role role;
 
     @Column(name = "user_status")
+    @Enumerated(EnumType.STRING)
     private UserStatus userStatus;
 
     @Column(name = "createTime")
