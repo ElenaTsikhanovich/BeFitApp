@@ -34,7 +34,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.PUT,"/api/product/**").hasAuthority(Role.ROLE_ADMIN.name())
                 .antMatchers(HttpMethod.DELETE,"/api/product/**").hasAuthority(Role.ROLE_ADMIN.name())
                 .antMatchers(HttpMethod.DELETE,"/api/recipe/**").hasAuthority(Role.ROLE_ADMIN.name())
-                .antMatchers(HttpMethod.POST, "/api/support").hasAuthority(Role.ROLE_ADMIN.name())
+                .antMatchers(HttpMethod.POST, "/api/support/**").hasAuthority(Role.ROLE_ADMIN.name())
                 .anyRequest().authenticated()
                 .and()
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
